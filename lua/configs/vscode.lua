@@ -1,0 +1,2 @@
+require('vscode').load('dark')
+
