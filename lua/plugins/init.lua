@@ -4,6 +4,13 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
     },
     {
+        'nvim-lualine/lualine.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        config = function ()
+            require "configs.lualine"
+        end
+    },
+    {
         "nvim-tree/nvim-tree.lua",
         version = "*",
         dependencies = {
