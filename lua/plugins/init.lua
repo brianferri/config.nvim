@@ -61,4 +61,9 @@ return {
             require "configs.gitsigns"
         end
     },
+    {
+        'mg979/vim-visual-multi',
+        branch = 'master',
+        event = 'VeryLazy',
+    }
 }
