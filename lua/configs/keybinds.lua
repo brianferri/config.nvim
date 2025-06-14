@@ -25,4 +25,3 @@ map(A, "<C-.>", vim.lsp.buf.code_action, opts)
 -- map(A, "gd", vim.lsp.buf.definition, opts)
 -- map(A, "<C-S-r>", vim.lsp.buf.references, opts)
 map(A, "<C-S-i>", function() vim.lsp.buf.format { async = true } end, opts)
-
