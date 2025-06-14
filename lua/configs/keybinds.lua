@@ -17,7 +17,7 @@ map(all_modes, '<C-w>', "<cmd>q<CR>", "Close Window")
 map(all_modes, '<C-s>', "<cmd>w<CR>", "Write File")
 map(all_modes, '<C-f>', "<ESC>/", "Search")
 
--- Select All, Move Lines
+-- Select All, Move Lines, Word Manipulation
 map(all_modes, '<C-a>', "<ESC>ggVG", "Select All")
 map(all_modes, '<M-Up>', '<cmd>m .-2<CR>==', "Move Line Up")
 map(all_modes, '<M-Down>', '<cmd>m .+1<CR>==', "Move Line Down")
@@ -26,12 +26,13 @@ map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
+map('v', '<BS>', '"_d', "Delete Selection")
 
 -- Copy/Cut/Paste/Undo
 map(all_modes, '<C-v>', '<Esc>pi', "Paste")
 map(all_modes, '<C-z>', '<Esc>ui', "Undo")
 
-map('v', '<C-c>', 'y<Esc>i', "Copy")
+map('v', '<C-c>', '"+y<Esc>i', "Copy")
 map('v', '<C-x>', 'd<Esc>i', "Cut")
 
 -- LSP Bindings
