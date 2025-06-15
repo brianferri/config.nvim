@@ -11,6 +11,8 @@ map(all_modes, '<M-S-p>', "<cmd>Telescope commands<CR>", "Telescope: Commands (c
 map(all_modes, '<C-b>', "<cmd>NvimTreeToggle<CR>", "Toggle File Tree")
 map(all_modes, '<C-g>', "<cmd>FloatermNew lazygit<CR>", "Open LazyGit")
 map(all_modes, '<C-,>', "<cmd>FloatermNew nvim ~/.config/nvim<CR>", "Open Nvim Config")
+map(all_modes, '<M-S-]>', "<cmd>BufferLineCycleNext<CR>", "Cycle Next Buffer")
+map(all_modes, '<M-S-[>', "<cmd>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
 -- Quit, Write, Search
 map(all_modes, '<C-q>', "<cmd>qa<CR>", "Quit All")
@@ -32,7 +34,7 @@ map({ 'i', 'n' }, '<M-Down>', '<cmd>m .+1<CR>', "Move Line Down")
 map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 
-map(all_modes, '<M-BS>', "<ESC>daw", "Delete A Word")
+map(all_modes, '<M-BS>', "<ESC>daw<ESC>i", "Delete A Word")
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
