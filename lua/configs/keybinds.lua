@@ -39,6 +39,7 @@ map('v', '<BS>', '"_d', "Delete Selection")
 map(all_modes, '<C-v>', '<ESC>pi', "Paste")
 map(all_modes, '<C-z>', '<ESC>ui', "Undo")
 
+map({'i', 'n'}, '<C-x>', '<ESC>dd<ESC>i', "Cut")
 map('v', '<C-c>', '"+y<ESC>i', "Copy")
 map('v', '<C-x>', 'd<ESC>i', "Cut")
 
