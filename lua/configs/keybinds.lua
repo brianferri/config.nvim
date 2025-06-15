@@ -47,6 +47,4 @@ map(all_modes, '<C-k>', function() vim.lsp.buf.hover { border = 'rounded' } end,
 map(all_modes, '<C-LeftMouse>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<C-r>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<C-.>', vim.lsp.buf.code_action, "LSP Code Action")
--- map(all_modes, 'gd', vim.lsp.buf.definition, "LSP Goto Definition")
--- map(all_modes, '<C-S-r>', vim.lsp.buf.references, "LSP References")
 map(all_modes, '<C-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
