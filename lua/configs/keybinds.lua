@@ -19,15 +19,15 @@ map(all_modes, '<C-f>', "<ESC>/", "Search")
 
 -- Select All, Move Lines, Word Manipulation
 map(all_modes, '<C-a>', "<ESC>ggVG", "Select All")
-map(all_modes, '<C-d>', '<Plug>(VM-Find-Under)', "VisualMulti: Select Next Word Down")
+map(all_modes, '<C-d>', '<ESC><Plug>(VM-Find-Under)', "VisualMulti: Select Next Word Down")
 
-map(all_modes, '<C-M-Up>', '<ESC>yyP', "Duplicate Line Up")
-map(all_modes, '<C-M-Down>', '<ESC>yyp', "Duplicate Line Down")
+map({'i', 'n'}, '<C-M-Up>', '<ESC>yyP', "Duplicate Line Up")
+map({'i', 'n'}, '<C-M-Down>', '<ESC>yyp', "Duplicate Line Down")
 map('v', '<C-M-Up>', ":t '<-1<CR>gv=gv", "Duplicate Selection Up")
 map('v', '<C-M-Down>', ":t '>+0<CR>gv=gv", "Duplicate Selection Down")
 
-map(all_modes, '<M-Up>', '<cmd>m .-2<CR>', "Move Line Up")
-map(all_modes, '<M-Down>', '<cmd>m .+1<CR>', "Move Line Down")
+map({'i', 'n'}, '<M-Up>', '<cmd>m .-2<CR>', "Move Line Up")
+map({'i', 'n'}, '<M-Down>', '<cmd>m .+1<CR>', "Move Line Down")
 map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 
