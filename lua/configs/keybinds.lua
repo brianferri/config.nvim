@@ -50,7 +50,8 @@ map('v', '<C-x>', 'd<ESC>i', "Cut")
 
 -- LSP Bindings
 map(all_modes, '<C-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
-map(all_modes, '<C-LeftMouse>', vim.lsp.buf.implementation, "LSP Implementation")
+map(all_modes, '<C-S-k>', vim.lsp.buf.references, "LSP References")
+map(all_modes, '<M-S-k>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<C-r>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<C-.>', vim.lsp.buf.code_action, "LSP Code Action")
 map(all_modes, '<C-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
