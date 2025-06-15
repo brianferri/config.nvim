@@ -39,9 +39,10 @@ map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 
--- Copy/Cut/Paste/Undo
+-- Copy/Cut/Paste/Undo/Redo
 map(all_modes, '<C-v>', '<ESC>pi', "Paste")
 map(all_modes, '<C-z>', '<ESC>ui', "Undo")
+map(all_modes, '<C-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<C-x>', '<ESC>dd<ESC>i', "Cut")
 map('v', '<C-c>', '"+y<ESC>i', "Copy")
