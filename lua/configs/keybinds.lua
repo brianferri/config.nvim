@@ -6,18 +6,18 @@ vim.o.keymodel = "startsel,stopsel"
 local all_modes = { 'i', 'n', 'v' }
 
 -- Core Telescope and File Navigation
-map(all_modes, '<M-p>', "<cmd>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
-map(all_modes, '<M-S-p>', "<cmd>Telescope commands<CR>", "Telescope: Commands (command palette)")
-map(all_modes, '<C-b>', "<cmd>NvimTreeToggle<CR>", "Toggle File Tree")
-map(all_modes, '<C-g>', "<cmd>FloatermNew lazygit<CR>", "Open LazyGit")
-map(all_modes, '<C-,>', "<cmd>FloatermNew nvim ~/.config/nvim<CR>", "Open Nvim Config")
-map(all_modes, '<M-S-]>', "<cmd>BufferLineCycleNext<CR>", "Cycle Next Buffer")
-map(all_modes, '<M-S-[>', "<cmd>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
+map(all_modes, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
+map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
+map(all_modes, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
+map(all_modes, '<C-g>', "<CMD>FloatermNew lazygit<CR>", "Open LazyGit")
+map(all_modes, '<C-,>', "<CMD>FloatermNew nvim ~/.config/nvim<CR>", "Open Nvim Config")
+map(all_modes, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
+map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
 -- Quit, Write, Search
-map(all_modes, '<C-q>', "<cmd>qa<CR>", "Quit All")
-map(all_modes, '<C-w>', "<cmd>q<CR>", "Close Window")
-map(all_modes, '<C-s>', "<cmd>w<CR>", "Write File")
+map(all_modes, '<C-q>', "<CMD>qa<CR>", "Quit All")
+map(all_modes, '<C-w>', "<CMD>q<CR>", "Close Window")
+map(all_modes, '<C-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<C-f>', "<ESC>/", "Search")
 
 -- Select All, Move Lines, Selection Manipulation
@@ -29,8 +29,8 @@ map({ 'i', 'n' }, '<M-C-S-Down>', '<ESC>yyp', "Duplicate Line Down")
 map('v', '<M-C-S-Up>', ":t '<-1<CR>gv=gv", "Duplicate Selection Up")
 map('v', '<M-C-S-Down>', ":t '>+0<CR>gv=gv", "Duplicate Selection Down")
 
-map({ 'i', 'n' }, '<M-Up>', '<cmd>m .-2<CR>', "Move Line Up")
-map({ 'i', 'n' }, '<M-Down>', '<cmd>m .+1<CR>', "Move Line Down")
+map({ 'i', 'n' }, '<M-Up>', '<CMD>m .-2<CR>', "Move Line Up")
+map({ 'i', 'n' }, '<M-Down>', '<CMD>m .+1<CR>', "Move Line Down")
 map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 
