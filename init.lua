@@ -15,6 +15,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 vim.diagnostic.config({ virtual_text = true })
 
+vim.opt.mousemoveevent = true
 vim.opt.termguicolors = true
 vim.opt.number = true
 vim.opt.expandtab = true

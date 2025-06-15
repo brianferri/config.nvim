@@ -1,5 +1,6 @@
 require("bufferline").setup({
     options = {
+        diagnostics = "nvim_lsp",
         buffer_close_icon = "",
         close_command = "bdelete %d",
         close_icon = "",
@@ -9,6 +10,11 @@ require("bufferline").setup({
         indicator = {
             style = "icon",
             icon = " ",
+        },
+        hover = {
+            enabled = true,
+            delay = 10,
+            reveal = { 'close' }
         },
         offsets = { { filetype = "NvimTree", text = "Workspace", text_align = "center" } },
         right_mouse_command = "bdelete! %d",
