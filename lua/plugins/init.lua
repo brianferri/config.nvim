@@ -25,6 +25,7 @@ return {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function() require "configs.ntree" end,
     },
+    { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' },
     {
         "neovim/nvim-lspconfig",
         dependencies = {
@@ -36,11 +37,7 @@ return {
     {
         "folke/lazydev.nvim",
         ft = "lua",
-        opts = {
-            library = {
-                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-            },
-        },
+        config = function() require "configs.lazydev" end,
     },
     {
         "hrsh7th/nvim-cmp",
@@ -69,5 +66,12 @@ return {
         'mg979/vim-visual-multi',
         branch = 'master',
         event = 'VeryLazy',
+    },
+    {
+        "rcarriga/nvim-dap-ui",
+        dependencies = {
+            "mfussenegger/nvim-dap",
+            "nvim-neotest/nvim-nio",
+        }
     }
 }
