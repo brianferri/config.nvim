@@ -4,21 +4,26 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
     },
     {
+        'akinsho/git-conflict.nvim',
+        version = "*",
+        config = true
+    },
+    {
+        'akinsho/bufferline.nvim',
+        version = "*",
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        config = function() require "configs.bufferline" end
+    },
+    {
         'nvim-lualine/lualine.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
-        config = function ()
-            require "configs.lualine"
-        end
+        config = function() require "configs.lualine" end
     },
     {
         "nvim-tree/nvim-tree.lua",
         version = "*",
-        dependencies = {
-            "nvim-tree/nvim-web-devicons",
-        },
-        config = function()
-            require "configs.ntree"
-        end,
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        config = function() require "configs.ntree" end,
     },
     {
         "neovim/nvim-lspconfig",
@@ -26,9 +31,7 @@ return {
             { "williamboman/mason.nvim",           config = true },
             { "williamboman/mason-lspconfig.nvim", config = true },
         },
-        config = function()
-            require "configs.lspconfig"
-        end,
+        config = function() require "configs.lspconfig" end,
     },
     {
         "folke/lazydev.nvim",
@@ -49,24 +52,18 @@ return {
             "L3MON4D3/LuaSnip",
             "saadparwaiz1/cmp_luasnip",
         },
-        config = function()
-            require "configs.cmp"
-        end
+        config = function() require "configs.cmp" end
     },
     {
         "Mofiqul/vscode.nvim",
-        config = function()
-            require "configs.vscode"
-        end
+        config = function() require "configs.vscode" end
     },
     {
         "voldikss/vim-floaterm"
     },
     {
         "lewis6991/gitsigns.nvim",
-        config = function()
-            require "configs.gitsigns"
-        end
+        config = function() require "configs.gitsigns" end
     },
     {
         'mg979/vim-visual-multi',

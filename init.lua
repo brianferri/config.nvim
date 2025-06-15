@@ -15,13 +15,14 @@ end
 vim.opt.rtp:prepend(lazypath)
 vim.diagnostic.config({ virtual_text = true })
 
+vim.opt.termguicolors = true
 vim.opt.number = true
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 
 vim.opt.list = true
-vim.opt.listchars = "space:·,tab:› ,trail:_,"
+vim.opt.listchars = { space = "·", tab = "› ", trail = "_" }
 
 -- Load plugins
 require("lazy").setup({
