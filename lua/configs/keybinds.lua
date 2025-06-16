@@ -46,11 +46,10 @@ map({ 'i', 'n' }, '<M-Down>', '<CMD>m .+1<CR>', "Move Line Down")
 map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 
-map({'n', 'v'}, '<M-BS>', 'vb"_d', "Delete Word Before Cursor")
-map({'n', 'v'}, '<M-Del>', 've"_d', "Delete Word After Cursor")
+map({ 'n', 'v' }, '<M-BS>', 'vb"_d', "Delete Word Before Cursor")
+map({ 'n', 'v' }, '<M-Del>', 've"_d', "Delete Word After Cursor")
 map('i', '<M-BS>', '<C-O>vb"_d', "Delete Word Before Cursor")
 map('i', '<M-Del>', '<C-O>ve"_d', "Delete Word After Cursor")
-
 
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
