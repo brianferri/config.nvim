@@ -4,19 +4,19 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
     },
     {
-        'akinsho/git-conflict.nvim',
+        "akinsho/git-conflict.nvim",
         version = "*",
         config = true
     },
     {
-        'akinsho/bufferline.nvim',
+        "akinsho/bufferline.nvim",
         version = "*",
-        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function() require "configs.bufferline" end
     },
     {
-        'nvim-lualine/lualine.nvim',
-        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        "nvim-lualine/lualine.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function() require "configs.lualine" end
     },
     {
@@ -25,7 +25,7 @@ return {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function() require "configs.ntree" end,
     },
-    { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' },
+    { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" },
     {
         "neovim/nvim-lspconfig",
         dependencies = {
@@ -67,9 +67,9 @@ return {
         config = function() require "configs.gitsigns" end
     },
     {
-        'mg979/vim-visual-multi',
-        branch = 'master',
-        event = 'VeryLazy',
+        "mg979/vim-visual-multi",
+        branch = "master",
+        event = "VeryLazy",
     },
     {
         "rcarriga/nvim-dap-ui",
