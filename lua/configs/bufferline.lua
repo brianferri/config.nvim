@@ -1,9 +1,9 @@
 require("bufferline").setup({
     options = {
         diagnostics = "nvim_lsp",
-        buffer_close_icon = "",
+        buffer_close_icon = "×",
         close_command = "bdelete %d",
-        close_icon = "",
+        close_icon = "×",
         left_trunc_marker = "",
         right_trunc_marker = "",
         modified_icon = "●",
