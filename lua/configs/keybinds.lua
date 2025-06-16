@@ -6,24 +6,24 @@ vim.o.keymodel = "startsel,stopsel"
 local all_modes = { 'i', 'n', 'v' }
 
 -- Core Telescope and File Navigation
-map(all_modes, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
-map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
 map(all_modes, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
 map(all_modes, '<C-g>', "<CMD>FloatermNew lazygit<CR>", "Open LazyGit")
 map(all_modes, '<C-,>', "<CMD>FloatermNew nvim ~/.config/nvim<CR>", "Open Nvim Config")
+map(all_modes, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
+map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
 map(all_modes, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
 map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
 -- Quit, Write, Search
-map(all_modes, '<C-q>', "<CMD>qa<CR>", "Quit All")
-map(all_modes, '<C-w>', "<CMD>q<CR>", "Close Window")
-map(all_modes, '<C-s>', "<CMD>w<CR>", "Write File")
-map(all_modes, '<C-f>', "<ESC>/", "Search In File")
-map(all_modes, '<C-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
+map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
+map(all_modes, '<M-w>', "<CMD>q<CR>", "Close Window")
+map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
+map(all_modes, '<M-f>', "<ESC>/", "Search In File")
+map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
 -- Select All, Move Lines, Selection Manipulation
 -- TODO add comment on selection/line
-map(all_modes, '<C-a>', "<ESC>ggVG", "Select All")
+map(all_modes, '<M-a>', "<ESC>ggVG", "Select All")
 
 map({ 'i', 'n' }, '<M-C-S-Up>', '<ESC>yyP', "Duplicate Line Up")
 map({ 'i', 'n' }, '<M-C-S-Down>', '<ESC>yyp', "Duplicate Line Down")
@@ -41,23 +41,23 @@ map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 
 -- Copy/Cut/Paste/Undo/Redo
-map(all_modes, '<C-v>', '<ESC>pi', "Paste")
-map(all_modes, '<C-z>', '<ESC>ui', "Undo")
-map(all_modes, '<C-S-z>', '<ESC><C-r>i', "Redo")
+map(all_modes, '<M-v>', '<ESC>pi', "Paste")
+map(all_modes, '<M-z>', '<ESC>ui', "Undo")
+map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<C-x>', '<ESC>dd<ESC>i', "Cut")
-map('v', '<C-c>', '"+y<ESC>i', "Copy")
-map('v', '<C-x>', 'd<ESC>i', "Cut")
+map('v', '<M-c>', '"+y<ESC>i', "Copy")
+map('v', '<M-x>', 'd<ESC>i', "Cut")
 
 -- LSP Bindings
-map(all_modes, '<C-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
-map(all_modes, '<C-S-k>', vim.lsp.buf.references, "LSP References")
+map(all_modes, '<M-C-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
+map(all_modes, '<M-C-S-k>', vim.lsp.buf.references, "LSP References")
 map(all_modes, '<M-S-k>', vim.lsp.buf.implementation, "LSP Implementation")
-map(all_modes, '<C-r>', vim.lsp.buf.rename, "LSP Rename")
-map(all_modes, '<C-.>', vim.lsp.buf.code_action, "LSP Code Action")
-map(all_modes, '<C-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
+map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
+map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
+map(all_modes, '<M-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
 
 -- Visual Multi
 vim.g.VM_default_mappings = 0
-map(all_modes, '<C-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
-map(all_modes, '<C-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
+map(all_modes, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
+map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
