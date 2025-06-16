@@ -52,6 +52,10 @@ return {
         config = function() require "configs.cmp" end
     },
     {
+        "norcalli/nvim-colorizer.lua",
+        config = function() require "colorizer".setup() end,
+    },
+    {
         "Mofiqul/vscode.nvim",
         config = function() require "configs.vscode" end
     },
