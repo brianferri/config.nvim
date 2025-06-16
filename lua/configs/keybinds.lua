@@ -20,8 +20,10 @@ map(all_modes, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down
 map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
 
 -- Movement
-map(all_modes, '<M-Right>', "<ESC>lwi", "Move to Next Word")
-map(all_modes, '<M-Left>', "<ESC>hbi", "Move to Next Word")
+map({ 'i', 'n' }, '<M-Right>', "<ESC>lwi", "Move To Next Word")
+map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
+map('v', '<M-S-Right>', "lw", "Expand Selection To Next Word")
+map('v', '<M-S-Left>', "b", "Reduce Selection By A Word")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
@@ -65,4 +67,3 @@ map(all_modes, '<M-S-k>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
 map(all_modes, '<M-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
-
