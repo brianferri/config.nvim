@@ -17,7 +17,7 @@ map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
 map(all_modes, '<M-w>', "<CMD>q<CR>", "Close Window")
-map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
+map(all_modes, '<C-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<M-f>', "<ESC>/", "Search In File")
 map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
@@ -41,17 +41,17 @@ map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 
 -- Copy/Cut/Paste/Undo/Redo
-map(all_modes, '<M-v>', '<ESC>pi', "Paste")
-map(all_modes, '<M-z>', '<ESC>ui', "Undo")
-map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
+map(all_modes, '<C-v>', '<ESC>pi', "Paste")
+map(all_modes, '<C-z>', '<ESC>ui', "Undo")
+map(all_modes, '<C-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<C-x>', '<ESC>dd<ESC>i', "Cut")
-map('v', '<M-c>', '"+y<ESC>i', "Copy")
-map('v', '<M-x>', 'd<ESC>i', "Cut")
+map('v', '<C-c>', '"+y<ESC>i', "Copy")
+map('v', '<C-x>', 'd<ESC>i', "Cut")
 
 -- LSP Bindings
-map(all_modes, '<M-C-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
-map(all_modes, '<M-C-S-k>', vim.lsp.buf.references, "LSP References")
+map(all_modes, '<M-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
+map(all_modes, '<M-C-k>', vim.lsp.buf.references, "LSP References")
 map(all_modes, '<M-S-k>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
