@@ -46,7 +46,12 @@ map({ 'i', 'n' }, '<M-Down>', '<CMD>m .+1<CR>', "Move Line Down")
 map('v', '<M-Up>', ":m '<-2<CR>gv=gv", "Move Selection Up")
 map('v', '<M-Down>', ":m '>+1<CR>gv=gv", "Move Selection Down")
 
-map(all_modes, '<M-BS>', "<ESC>daw<ESC>i", "Delete A Word")
+map({'n', 'v'}, '<M-BS>', 'vb"_d', "Delete Word Before Cursor")
+map({'n', 'v'}, '<M-Del>', 've"_d', "Delete Word After Cursor")
+map('i', '<M-BS>', '<C-O>vb"_d', "Delete Word Before Cursor")
+map('i', '<M-Del>', '<C-O>ve"_d', "Delete Word After Cursor")
+
+
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
@@ -57,8 +62,8 @@ map(all_modes, '<M-z>', '<ESC>ui', "Undo")
 map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<M-x>', '<ESC>dd<ESC>i', "Cut")
-map('v', '<M-c>', '"+y<ESC>i', "Copy")
 map('v', '<M-x>', 'd<ESC>i', "Cut")
+map('v', '<M-c>', '"+y<ESC>i', "Copy")
 
 -- LSP Bindings
 map(all_modes, '<M-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
