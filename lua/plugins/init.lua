@@ -25,7 +25,13 @@ return {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function() require "configs.ntree" end,
     },
-    { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" },
+    {
+        "nvim-treesitter/nvim-treesitter",
+        branch = "master",
+        lazy = false,
+        run = ":TSUpdate",
+        config = function () require "configs.treesitter" end,
+    },
     {
         "neovim/nvim-lspconfig",
         dependencies = {
