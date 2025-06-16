@@ -77,5 +77,13 @@ return {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
         }
-    }
+    },
+    {
+        "RRethy/vim-illuminate"
+    },
+    {
+        "lukas-reineke/indent-blankline.nvim",
+        main = "ibl",
+        opts = {},
+    },
 }
