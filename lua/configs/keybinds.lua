@@ -55,6 +55,7 @@ map('i', '<M-Del>', '<C-O>ve"_d', "Delete Word After Cursor")
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
+map('v', '<DEL>', '"_d', "Delete Selection")
 
 -- Copy/Cut/Paste/Undo/Redo
 map(all_modes, '<M-v>', '<ESC>pi', "Paste")
