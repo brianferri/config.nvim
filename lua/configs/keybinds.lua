@@ -22,8 +22,8 @@ map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurren
 -- Movement
 map({ 'i', 'n' }, '<M-Right>', "<ESC>lwi", "Move To Next Word")
 map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
-map('v', '<M-S-Right>', "lw", "Expand Selection To Next Word")
-map('v', '<M-S-Left>', "b", "Reduce Selection By A Word")
+map('v', '<M-S-Right>', "lw", "Shift Selection Right By A Word")
+map('v', '<M-S-Left>', "b", "Shift Selection Left By A Word")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
