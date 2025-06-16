@@ -84,6 +84,10 @@ return {
     {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
-        opts = {},
+        dependencies = { {
+            "HiPhish/rainbow-delimiters.nvim",
+            submodules = false,
+        } },
+        config = function() require "configs.ibl" end
     },
 }
