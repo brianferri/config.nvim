@@ -57,5 +57,6 @@ map(all_modes, '<C-.>', vim.lsp.buf.code_action, "LSP Code Action")
 map(all_modes, '<C-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
 
 -- Visual Multi
+vim.g.VM_default_mappings = 0
 map(all_modes, '<C-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
 map(all_modes, '<C-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
