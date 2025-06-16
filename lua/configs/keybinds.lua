@@ -14,10 +14,19 @@ map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (c
 map(all_modes, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
 map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
+-- Visual Multi
+vim.g.VM_default_mappings = 0
+map(all_modes, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
+map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
+
+-- Movement
+map(all_modes, '<M-Right>', "<ESC>lwi", "Move to Next Word")
+map(all_modes, '<M-Left>', "<ESC>hbi", "Move to Next Word")
+
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
 map(all_modes, '<M-w>', "<CMD>q<CR>", "Close Window")
-map(all_modes, '<C-s>', "<CMD>w<CR>", "Write File")
+map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<M-f>', "<ESC>/", "Search In File")
 map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
@@ -41,13 +50,13 @@ map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 
 -- Copy/Cut/Paste/Undo/Redo
-map(all_modes, '<C-v>', '<ESC>pi', "Paste")
-map(all_modes, '<C-z>', '<ESC>ui', "Undo")
-map(all_modes, '<C-S-z>', '<ESC><C-r>i', "Redo")
+map(all_modes, '<M-v>', '<ESC>pi', "Paste")
+map(all_modes, '<M-z>', '<ESC>ui', "Undo")
+map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
-map({ 'i', 'n' }, '<C-x>', '<ESC>dd<ESC>i', "Cut")
-map('v', '<C-c>', '"+y<ESC>i', "Copy")
-map('v', '<C-x>', 'd<ESC>i', "Cut")
+map({ 'i', 'n' }, '<M-x>', '<ESC>dd<ESC>i', "Cut")
+map('v', '<M-c>', '"+y<ESC>i', "Copy")
+map('v', '<M-x>', 'd<ESC>i', "Cut")
 
 -- LSP Bindings
 map(all_modes, '<M-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
@@ -57,7 +66,3 @@ map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
 map(all_modes, '<M-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
 
--- Visual Multi
-vim.g.VM_default_mappings = 0
-map(all_modes, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
-map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
