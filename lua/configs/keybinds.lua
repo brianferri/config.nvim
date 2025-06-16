@@ -18,7 +18,8 @@ map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer
 map(all_modes, '<C-q>', "<CMD>qa<CR>", "Quit All")
 map(all_modes, '<C-w>', "<CMD>q<CR>", "Close Window")
 map(all_modes, '<C-s>', "<CMD>w<CR>", "Write File")
-map(all_modes, '<C-f>', "<ESC>/", "Search")
+map(all_modes, '<C-f>', "<ESC>/", "Search In File")
+map(all_modes, '<C-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
 -- Select All, Move Lines, Selection Manipulation
 -- TODO add comment on selection/line
