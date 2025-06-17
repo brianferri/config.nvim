@@ -17,9 +17,6 @@ require("nvim-tree").setup({
     renderer = {
         highlight_git = true,
         icons = {
-            show = {
-                git = false,
-            },
             glyphs = {
                 git = {
                     ignored = "",
