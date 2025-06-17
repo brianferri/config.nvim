@@ -20,6 +20,10 @@ map({'i', 'n'}, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Dow
 map('v', '<M-d>', '<Plug>(VM-Find-Subword-Under)', "VM: Select Next Word Down")
 map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
 
+-- Split Panes
+map({ 'i', 'n' }, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
+map({ 'i', 'n' }, '<M-->', '<CMD>split<CR>', "Horizontal Split")
+
 -- Movement
 map({ 'i', 'n' }, '<M-Right>', "<ESC>lwi", "Move To Next Word")
 map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
