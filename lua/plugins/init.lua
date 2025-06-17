@@ -30,7 +30,7 @@ return {
         branch = "master",
         lazy = false,
         run = ":TSUpdate",
-        config = function () require "configs.treesitter" end,
+        config = function() require "configs.treesitter" end,
     },
     {
         "neovim/nvim-lspconfig",
@@ -82,6 +82,7 @@ return {
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
+            "mfussenegger/nvim-dap-python",
         }
     },
     {
@@ -95,5 +96,11 @@ return {
             submodules = false,
         } },
         config = function() require "configs.ibl" end
+    },
+    {
+        "linux-cultist/venv-selector.nvim",
+        lazy = false,
+        branch = "regexp",
+        opts = {},
     },
 }
