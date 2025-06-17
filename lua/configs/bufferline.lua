@@ -8,8 +8,7 @@ require("bufferline").setup({
         right_trunc_marker = "",
         modified_icon = "●",
         indicator = {
-            style = "icon",
-            icon = " ",
+            style = "underline",
         },
         hover = {
             enabled = true,

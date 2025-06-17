@@ -88,6 +88,7 @@ return {
     {
         "RRethy/vim-illuminate"
     },
+    -- Setup Specific Plugins
     {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
