@@ -16,7 +16,8 @@ map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer
 
 -- Visual Multi
 vim.g.VM_default_mappings = 0
-map(all_modes, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
+map({'i', 'n'}, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
+map('v', '<M-d>', '<Plug>(VM-Find-Subword-Under)', "VM: Select Next Word Down")
 map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
 
 -- Movement
