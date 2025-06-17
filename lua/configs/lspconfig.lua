@@ -14,5 +14,6 @@ require("mason-lspconfig").setup({
         "cssls",
         "gopls",
         "pyright",
+        "phpactor",
     },
 })
