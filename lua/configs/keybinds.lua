@@ -34,7 +34,7 @@ map('v', '<M-S-Left>', "b", "Shift Selection Left By A Word")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
-map(all_modes, '<M-w>', "<CMD>q<CR>", "Close Window")
+map(all_modes, '<M-w>', "<CMD>bp <BAR> bd #<CR>", "Close Window")
 map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<M-f>', "<ESC>/", "Search In File")
 map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
