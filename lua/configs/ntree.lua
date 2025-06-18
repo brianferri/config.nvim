@@ -4,7 +4,6 @@ vim.g.loaded_netrwPlugin = 1
 require("nvim-tree").setup({
     disable_netrw = true,
     hijack_cursor = true,
-    create_in_closed_folder = true,
     focus_empty_on_setup = true,
     sync_root_with_cwd = true,
     update_focused_file = {
