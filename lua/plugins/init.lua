@@ -24,7 +24,7 @@ return {
         "nvim-tree/nvim-tree.lua",
         version = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
-        config = function() require "configs.ntree" end,
+        config = function() require "configs.nvimtree" end,
     },
     {
         "nvim-treesitter/nvim-treesitter",
