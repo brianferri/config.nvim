@@ -64,6 +64,7 @@ return {
     },
     {
         "Mofiqul/vscode.nvim",
+        priority = 1000,
         config = function() require "configs.vscode" end
     },
     {
@@ -80,6 +81,7 @@ return {
     },
     {
         "rcarriga/nvim-dap-ui",
+        event = "VeryLazy",
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
