@@ -2,7 +2,6 @@ local highlight = {
     "RainbowYellow",
     "RainbowBlue",
     "RainbowViolet",
-    "RainbowCyan",
 }
 local hooks = require "ibl.hooks"
 
