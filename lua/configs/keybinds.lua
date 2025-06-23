@@ -26,18 +26,18 @@ map(all_modes, '<C-S-Down>', '<ESC><Plug>(VM-Select-Cursor-Down)', "VM: Start Se
 map({ 'i', 'n' }, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
 map({ 'i', 'n' }, '<M-->', '<CMD>split<CR>', "Horizontal Split")
 
--- Movement
-map({ 'i', 'n' }, '<M-Right>', "<ESC>lwi", "Move To Next Word")
-map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
-map('v', '<M-S-Right>', "lw", "Shift Selection Right By A Word")
-map('v', '<M-S-Left>', "b", "Shift Selection Left By A Word")
-
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
 map(all_modes, '<M-w>', "<CMD>bp <BAR> bd #<CR>", "Close Window")
 map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<M-f>', "<ESC>/", "Search In File")
 map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
+
+-- Movement
+map({ 'i', 'n' }, '<M-Right>', "<ESC>lwi", "Move To Next Word")
+map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
+map('v', '<M-S-Right>', "lw", "Shift Selection Right By A Word")
+map('v', '<M-S-Left>', "b", "Shift Selection Left By A Word")
 
 -- Select All, Move Lines, Selection Manipulation
 -- TODO add comment on selection/line
