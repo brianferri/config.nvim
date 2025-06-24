@@ -87,7 +87,8 @@ return {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
             "mfussenegger/nvim-dap-python",
-        }
+        },
+        config = function () require "configs.dapui" end
     },
     {
         "RRethy/vim-illuminate"
