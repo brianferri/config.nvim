@@ -13,30 +13,24 @@ local scan = require("plenary.scandir")
 
 local M = {}
 
---- @class DapAdapterDefinition
---- @field name string Name of the registered adapter (e.g. "lldb")
---- @field request string (e.g. "launch" or "attach")
---- @field config table Additional launch config fields (like args, stopOnEntry, etc.)
---- @field adapter dap.Adapter
----
 --- @class DapRunConfig
 --- @field search_root string? Directory to search executables from.
---- @field adapter_options table<string, DapAdapterDefinition>
+--- @field configurations table<string, dap.Configuration> Table of `Name: DAPDef` options
 
 --- @type DapRunConfig
-local user_config = {
+local user_opts = {
     search_root = ".",
-    adapter_options = {},
+    configurations = {},
 }
 
 --- Apply user configuration and register DAP adapters
 --- @param opts DapRunConfig
 function M.configure(opts)
-    user_config.search_root = opts.search_root or user_config.search_root
-    user_config.adapter_options = vim.tbl_extend(
+    user_opts.search_root = opts.search_root or user_opts.search_root
+    user_opts.configurations = vim.tbl_extend(
         "force",
-        user_config.adapter_options,
-        opts.adapter_options
+        user_opts.configurations,
+        opts.configurations
     )
 end
 
@@ -44,7 +38,7 @@ end
 --- @return string[]
 local function find_executables()
     local results = {}
-    scan.scan_dir(user_config.search_root, {
+    scan.scan_dir(user_opts.search_root, {
         hidden = false,
         add_dirs = false,
         depth = 5,
@@ -58,33 +52,36 @@ local function find_executables()
 end
 
 --- Pick a DAP adapter
---- @param callback fun(cfg: DapAdapterDefinition)
+--- @param callback fun(cfg_name: string)
 local function pick_adapter(callback)
-    local opts = user_config.adapter_options
-    local keys = vim.tbl_keys(opts)
+    local keys = vim.tbl_keys(user_opts.configurations)
     if #keys == 0 then
         vim.notify("No DAP adapter options configured.", vim.log.levels.WARN)
         return
-    end
-    if #keys == 1 then
-        callback(opts[keys[1]])
+    elseif #keys == 1 then
+        callback(keys[1])
         return
     end
+
     vim.ui.select(keys, { prompt = "Select DAP Adapter:" }, function(choice)
-        if choice then callback(opts[choice]) end
+        if choice then callback(choice) end
     end)
 end
 
 --- Run nvim-dap with selected adapter and executable
 --- @param path string
---- @param cfg DapAdapterDefinition
-local function run_dap(path, cfg)
-    dap.run(
-        vim.tbl_deep_extend("force", cfg.config, {
-            program = path,
-            cwd = Path:new(path):parent():absolute(),
-        })
-    )
+--- @param cfg_name string
+local function run_dap(path, cfg_name)
+    local cfg = user_opts.configurations[cfg_name]
+
+    -- vim.print(cfg_name, cfg)
+    local dap_cfg = vim.tbl_deep_extend("force", cfg, {
+        name = cfg_name,
+        program = path,
+        cwd = Path:new(path):parent():absolute(),
+    })
+    vim.print(dap_cfg)
+    dap.run(dap_cfg)
 end
 
 --- Creates entry maker for executable files
@@ -123,7 +120,7 @@ local previewer = previewers.new_buffer_previewer({
 function M.dap_run()
     local executables = find_executables()
     if vim.tbl_isempty(executables) then
-        vim.notify("No executables found under: " .. user_config.search_root, vim.log.levels.WARN)
+        vim.notify("No executables found under: " .. user_opts.search_root, vim.log.levels.WARN)
         return
     end
 
@@ -148,8 +145,8 @@ function M.dap_run()
                 actions.close(prompt_bufnr)
                 local selection = action_state.get_selected_entry()
                 if selection then
-                    pick_adapter(function(adapter_cfg)
-                        run_dap(selection.path, adapter_cfg)
+                    pick_adapter(function(cfg)
+                        run_dap(selection.path, cfg)
                     end)
                 end
             end)

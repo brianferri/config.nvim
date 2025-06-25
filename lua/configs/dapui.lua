@@ -5,21 +5,18 @@ dap.adapters.lldb = {
     type = "server",
     port = "${port}",
     executable = {
-        command = "codelldb",
+        command = "lldb",
         args = { "--port", "${port}" },
     },
 }
 
 -- Custom commands
 require("plugins.dap.run").setup({
-    adapter_options = {
+    configurations = {
         codelldb = {
+            name = "Launch",
+            type = "lldb",
             request = "launch",
-            adapter = dap.adapters.lldb,
-            config = {
-                stopOnEntry = false,
-                args = {},
-            },
         },
     },
 })
