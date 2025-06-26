@@ -73,14 +73,11 @@ end
 --- @param cfg_name string
 local function run_dap(path, cfg_name)
     local cfg = user_opts.configurations[cfg_name]
-
-    -- vim.print(cfg_name, cfg)
     local dap_cfg = vim.tbl_deep_extend("force", cfg, {
         name = cfg_name,
         program = path,
         cwd = Path:new(path):parent():absolute(),
     })
-    vim.print(dap_cfg)
     dap.run(dap_cfg)
 end
 
