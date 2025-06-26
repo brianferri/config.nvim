@@ -77,14 +77,14 @@ return {
         event = "VeryLazy",
     },
     {
-        "rcarriga/nvim-dap-ui",
+        "mfussenegger/nvim-dap",
         event = "VeryLazy",
         dependencies = {
-            "mfussenegger/nvim-dap",
+            "rcarriga/nvim-dap-ui",
             "nvim-neotest/nvim-nio",
-            "mfussenegger/nvim-dap-python",
+            "theHamsta/nvim-dap-virtual-text",
         },
-        config = function () require "configs.dapui" end
+        config = function() require "configs.dap" end
     },
     {
         "RRethy/vim-illuminate"

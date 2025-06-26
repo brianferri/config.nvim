@@ -1,8 +1,11 @@
 local os = require("os")
 local dap = require("dap")
 local dapui = require("dapui")
+local dapvt = require("nvim-dap-virtual-text")
 
 dapui.setup()
+dapvt.setup()
+
 dap.listeners.before.attach.dapui_config = dapui.open
 dap.listeners.before.launch.dapui_config = dapui.open
 dap.listeners.before.event_terminated.dapui_config = dapui.close
