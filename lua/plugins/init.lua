@@ -60,10 +60,6 @@ return {
         config = function() require "configs.cmp" end
     },
     {
-        "norcalli/nvim-colorizer.lua",
-        config = function() require "colorizer".setup() end,
-    },
-    {
         "Mofiqul/vscode.nvim",
         priority = 1000,
         config = function() require "configs.vscode" end
@@ -94,6 +90,10 @@ return {
         "RRethy/vim-illuminate"
     },
     -- Setup Specific Plugins
+    {
+        "norcalli/nvim-colorizer.lua",
+        config = function() require "colorizer".setup() end,
+    },
     {
         "lukas-reineke/indent-blankline.nvim",
         main = "ibl",
