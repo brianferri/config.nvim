@@ -4,7 +4,7 @@ local dapui = require("dapui")
 local dapvt = require("nvim-dap-virtual-text")
 
 dapui.setup()
-dapvt.setup()
+dapvt.setup({})
 
 dap.listeners.before.attach.dapui_config = dapui.open
 dap.listeners.before.launch.dapui_config = dapui.open
@@ -27,7 +27,6 @@ require("plugins.dap.run").setup({
             name = "Launch",
             type = "codelldb",
             request = "launch",
-
         },
     },
 })
