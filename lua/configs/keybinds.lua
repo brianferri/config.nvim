@@ -63,6 +63,12 @@ map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 map('v', '<DEL>', '"_d', "Delete Selection")
 
+map('v', '(', "<Plug>(nvim-surround-visual))", "Surround Selection With `()`")
+map('v', '[', "<Plug>(nvim-surround-visual)]", "Surround Selection With `[]`")
+map('v', '{', "<Plug>(nvim-surround-visual)}", "Surround Selection With `{}`")
+map('v', "'", "<Plug>(nvim-surround-visual)'", "Surround Selection With `''`")
+map('v', '"', '<Plug>(nvim-surround-visual)"', 'Surround Selection With `""`')
+
 -- Copy/Cut/Paste/Undo/Redo
 map(all_modes, '<M-v>', '<ESC>pi', "Paste")
 map(all_modes, '<M-z>', '<ESC>ui', "Undo")
