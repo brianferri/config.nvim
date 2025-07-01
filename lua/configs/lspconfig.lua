@@ -9,7 +9,7 @@ require("mason-lspconfig").setup({
         "clangd",
         "zls",
         "ts_ls",
-        "vtsls",
+        "vue_ls",
         "html",
         "cssls",
         "gopls",
