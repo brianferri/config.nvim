@@ -17,5 +17,6 @@ require("mason-lspconfig").setup({
         "phpactor",
         "tailwindcss",
         "asm_lsp",
+        "bashls",
     },
 })
