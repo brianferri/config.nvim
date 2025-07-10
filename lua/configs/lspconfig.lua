@@ -18,5 +18,6 @@ require("mason-lspconfig").setup({
         "tailwindcss",
         "asm_lsp",
         "bashls",
+        "emmet_language_server",
     },
 })
