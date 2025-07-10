@@ -19,5 +19,6 @@ require("mason-lspconfig").setup({
         "asm_lsp",
         "bashls",
         "emmet_language_server",
+        "eslint",
     },
 })
