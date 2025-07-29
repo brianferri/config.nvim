@@ -8,7 +8,7 @@ require("mason-lspconfig").setup({
         "rust_analyzer",
         "clangd",
         "zls",
-        "ts_ls",
+        "vtsls",
         "vue_ls",
         "html",
         "cssls",
