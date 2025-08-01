@@ -22,3 +22,6 @@ require("mason-lspconfig").setup({
         "eslint",
     },
 })
+
+-- Some lsps may require certain configurations or overrides
+require("configs.lsps.vue")
