@@ -23,8 +23,10 @@ map(all_modes, '<C-S-Up>', '<ESC><Plug>(VM-Select-Cursor-Up)', "VM: Start Select
 map(all_modes, '<C-S-Down>', '<ESC><Plug>(VM-Select-Cursor-Down)', "VM: Start Selecting Down")
 
 -- Split Panes
-map({ 'i', 'n' }, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
-map({ 'i', 'n' }, '<M-->', '<CMD>split<CR>', "Horizontal Split")
+vim.o.spr = true
+vim.o.sb = true
+map(all_modes, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
+map(all_modes, '<M-->', '<CMD>split<CR>', "Horizontal Split")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
