@@ -29,6 +29,10 @@ map(all_modes, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
 map(all_modes, '<M-->', '<CMD>split<CR>', "Horizontal Split")
 map(all_modes, '<M-S-\\>', "<CMD>vsplit <BAR> terminal<CR>i", "Terminal in Vertical Split")
 map(all_modes, '<M-S-->', "<CMD>split <BAR> terminal<CR>i", "Terminal in Horizontal Split")
+map(all_modes, '<C-Left>', "<ESC><C-w>h", "Move Between Splits Left")
+map(all_modes, '<C-Down>', "<ESC><C-w>j", "Move Between Splits Down")
+map(all_modes, '<C-Up>', "<ESC><C-w>k", "Move Between Splits Up")
+map(all_modes, '<C-Right>', "<ESC><C-w>l", "Move Between Splits Right")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
