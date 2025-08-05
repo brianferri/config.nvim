@@ -27,6 +27,8 @@ vim.o.spr = true
 vim.o.sb = true
 map(all_modes, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
 map(all_modes, '<M-->', '<CMD>split<CR>', "Horizontal Split")
+map(all_modes, '<M-S-\\>', "<CMD>vsplit <BAR> terminal<CR>i", "Terminal in Vertical Split")
+map(all_modes, '<M-S-->', "<CMD>split <BAR> terminal<CR>i", "Terminal in Horizontal Split")
 
 -- Quit, Write, Search
 map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
