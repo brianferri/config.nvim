@@ -80,12 +80,12 @@ map('v', "'", "<Plug>(nvim-surround-visual)'", "Surround Selection With `''`")
 map('v', '"', '<Plug>(nvim-surround-visual)"', 'Surround Selection With `""`')
 
 -- Copy/Cut/Paste/Undo/Redo
-map(all_modes, '<M-v>', '<ESC>pi', "Paste")
+map(all_modes, '<M-v>', '<ESC>pa', "Paste")
 map(all_modes, '<M-z>', '<ESC>ui', "Undo")
 map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<M-x>', '<ESC>dd<ESC>i', "Cut")
-map('v', '<M-x>', 'd<ESC>i', "Cut")
+map('v', '<M-x>', '"+d<ESC>i', "Cut")
 map('v', '<M-c>', '"+y<ESC>i', "Copy")
 
 -- LSP Bindings
