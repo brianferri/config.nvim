@@ -62,7 +62,7 @@ return {
     {
         "Mofiqul/vscode.nvim",
         priority = 1000,
-        config = function() require "configs.vscode" end
+        config = function() require "configs.vscode-theme" end
     },
     {
         "voldikss/vim-floaterm"
