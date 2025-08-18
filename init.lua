@@ -13,7 +13,14 @@ end
 
 -- vim specific
 vim.opt.rtp:prepend(lazypath)
-vim.diagnostic.config({ virtual_text = true })
+vim.diagnostic.config({
+    virtual_text = true,
+    update_in_insert = true,
+    float = {
+        border = "rounded",
+        source = "if_many"
+    }
+})
 
 vim.opt.mousemoveevent = true
 vim.opt.termguicolors = true

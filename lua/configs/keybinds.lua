@@ -95,3 +95,6 @@ map(all_modes, '<C-k>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
 map(all_modes, '<M-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
+
+-- Diagnostics
+map(all_modes, '<M-e>', vim.diagnostic.open_float, "Open Diagnostics")
