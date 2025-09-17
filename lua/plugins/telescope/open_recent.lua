@@ -18,14 +18,14 @@ local M = {}
 --- @field is_dir boolean Whether the path is a directory.
 --- @field icon string Devicon associated with the path.
 --- @field icon_hl string Highlight group for the icon.
----
+
 --- @class TelescopeEntry
 --- @field value string
 --- @field ordinal string
 --- @field display fun(): string
 --- @field path string
 --- @field is_dir boolean
----
+
 --- @class OpenRecentConfig
 --- @field directory_preview { list_command: string, arguments: string[] } Optional preview command configuration.
 
@@ -38,9 +38,7 @@ local user_config = {
 }
 
 --- Apply user configuration
----
 --- NOTE This is already called once on `setup` with it's `opts`
----
 --- @param opts OpenRecentConfig
 function M.configure(opts)
     opts = opts or {}
