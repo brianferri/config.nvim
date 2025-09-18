@@ -8,6 +8,8 @@ local entry_display = require("telescope.pickers.entry_display")
 
 local conf = require("telescope.config").values
 
+local devicons = require("nvim-web-devicons")
+
 local M = {}
 
 --- Provides a Telescope picker for recently opened files and directories.
@@ -37,28 +39,12 @@ local user_config = {
     },
 }
 
---- Apply user configuration
---- NOTE This is already called once on `setup` with it's `opts`
---- @param opts OpenRecentConfig
-function M.configure(opts)
-    opts = opts or {}
-    if opts.directory_preview then
-        if opts.directory_preview.list_command and opts.directory_preview.list_command ~= "" then
-            user_config.directory_preview.list_command = opts.directory_preview.list_command
-        end
-        if opts.directory_preview.arguments then
-            user_config.directory_preview.arguments = opts.directory_preview.arguments
-        end
-    end
-end
-
 --- Gets devicon and highlight group for a file or directory.
 --- @param path string The file or directory path.
---- @param devicons { get_icon: fun(name: string, ext: string, opts: {default: boolean}): (string|nil, string|nil) }
 --- @return string icon
 --- @return string hl_group
 --- @return boolean is_dir
-local function get_icon_and_hl(path, devicons)
+local function get_icon_and_hl(path)
     if vim.fn.isdirectory(path) == 1 then
         local icon, hl = devicons.get_icon("folder", "", { default = true })
         return icon or "", hl or "Directory", true
@@ -72,10 +58,9 @@ end
 
 --- Formats a path into a RecentItem with icon and metadata.
 --- @param path string Path to format.
---- @param devicons table Devicons plugin instance.
 --- @return RecentItem
-local function format_item(path, devicons)
-    local icon, hl_group, is_dir = get_icon_and_hl(path, devicons)
+local function format_item(path)
+    local icon, hl_group, is_dir = get_icon_and_hl(path)
     return {
         path = path,
         is_dir = is_dir,
@@ -94,12 +79,11 @@ end
 --- Gets a list of valid, unique recent file/directory items.
 --- @return RecentItem[]
 local function get_recent_items()
-    local devicons = require("nvim-web-devicons")
     local seen = {}
     return vim.tbl_map(
         function(path)
             seen[path] = true
-            return format_item(path, devicons)
+            return format_item(path)
         end,
         vim.tbl_filter(
             function(path) return is_valid_path(path) and not seen[path] end,
@@ -182,7 +166,7 @@ local function open_path(selection)
     end
 end
 
-function M.open_recent()
+local function open_recent()
     local displayer = entry_display.create({
         separator = " ",
         items = {
@@ -212,8 +196,8 @@ end
 --- Setup the `Open Recent` command
 ---@param opts OpenRecentConfig
 function M.setup(opts)
-    M.configure(opts)
-    vim.api.nvim_create_user_command("OpenRecent", M.open_recent, {
+    user_config = vim.tbl_deep_extend('force', user_config, opts)
+    vim.api.nvim_create_user_command("OpenRecent", open_recent, {
         desc = "Open Recent File or Directory",
     })
 end
