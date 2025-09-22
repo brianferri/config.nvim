@@ -4,3 +4,4 @@ require("plugins.telescope.open_recent").setup({
         arguments = { "-lh", "--icons=always", "--color=never" },
     }
 })
+require("plugins.telescope.search_replace").setup({})
