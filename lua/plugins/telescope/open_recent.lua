@@ -39,6 +39,10 @@ local user_config = {
     },
 }
 
+-----------------------------------------------------------
+-- Utility
+-----------------------------------------------------------
+
 --- Gets devicon and highlight group for a file or directory.
 --- @param path string The file or directory path.
 --- @return string icon
@@ -105,6 +109,10 @@ local function run_command_to_buffer(cmd, bufnr)
     end):wait()
 end
 
+-----------------------------------------------------------
+-- Previewer
+-----------------------------------------------------------
+
 --- Places the output of the configured list command into the passed buffer.
 --- @param path string
 --- @param bufnr integer
@@ -152,6 +160,10 @@ local function create_entry_maker(displayer)
     end
 end
 
+-----------------------------------------------------------
+-- Picker
+-----------------------------------------------------------
+
 --- Opens the selected file or directory from the picker.
 --- @param selection TelescopeEntry|nil
 local function open_path(selection)
@@ -192,6 +204,10 @@ local function open_recent()
         end,
     }):find()
 end
+
+-----------------------------------------------------------
+-- Setup
+-----------------------------------------------------------
 
 --- Setup the `Open Recent` command
 ---@param opts OpenRecentConfig
