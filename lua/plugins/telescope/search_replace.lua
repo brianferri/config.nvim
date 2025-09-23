@@ -145,6 +145,7 @@ end
 --- @param prompt string
 --- @return Hunk[]
 local function collect_hunks(lines, prompt)
+    --- @type Hunk[], vim.regex
     local hunks, pattern = {}, vim.regex(vim.pesc(prompt))
     for lnum, line in ipairs(lines) do
         if pattern:match_str(line) then
@@ -165,6 +166,7 @@ end
 --- @param new_lines string[]
 --- @return Hunk[]
 local function collect_changed_hunks(orig_lines, new_lines)
+    --- @type Hunk[]
     local hunks = {}
     for lnum = 1, math.max(#orig_lines, #new_lines) do
         local orig, new = orig_lines[lnum] or "", new_lines[lnum] or ""
@@ -213,6 +215,7 @@ end
 --- @param prompt string
 --- @param filetype string
 local function render_diff(bufnr, lines, hunks, prompt, filetype)
+    --- @type string[], table<integer, DiffLineMeta>
     local out, line_map = {}, {}
     local pattern = vim.regex(vim.pesc(prompt))
 
@@ -247,6 +250,7 @@ end
 --- @param replace_spec ReplaceSpec
 --- @param filetype string
 local function render_replace_diff(bufnr, orig_lines, new_lines, hunks, replace_spec, filetype)
+    --- @type string[], table<integer, ReplaceDiffMeta>
     local out, line_map = {}, {}
     for _, hunk in ipairs(hunks) do
         table.insert(out, string.format("@@@ -%d,%d +%d,%d @@@",
@@ -292,6 +296,7 @@ end
 --- @return fun(p: string|nil, replace_spec: ReplaceSpec|nil): nil set_prompt
 local function create_file_entry_maker()
     local displayer = entry_display.create({ separator = " ", items = { { width = 2 }, { remaining = true } } })
+    --- @type string?, ReplaceSpec?, table<string, boolean>
     local last_prompt, last_replace_spec, seen = nil, nil, {}
 
     --- Set the current prompt and replace spec used by produced entries.
@@ -306,8 +311,10 @@ local function create_file_entry_maker()
     --- @return TelescopeReplaceEntry|nil
     local function entry_maker(line)
         if not line or line == "" then return nil end
+        --- @type string, string, string, string
         local filename, lnum, col, text = line:match("^(.-):(%d+):(%d+):(.*)$")
         if not filename then
+            --- @type string, string, string
             filename, lnum, text = line:match("^(.-):(%d+):(.*)$")
         end
         if not filename or seen[filename] then return nil end
@@ -338,59 +345,68 @@ local grep_buffer_previewer = (function()
     return previewers.new_buffer_previewer({
         dyn_title = function(_, entry) return Path:new(from_entry.path(entry, false, false)):normalize(cwd) end,
         get_buffer_by_name = function(_, entry) return from_entry.path(entry, false, false) end,
-        define_preview = function(self, entry)
-            local path = from_entry.path(entry, true, false)
-            if not path then return end
+        define_preview =
+        --- @param self {state: {bufnr: integer}}
+        --- @param entry TelescopeReplaceEntry
+            function(self, entry)
+                local path = from_entry.path(entry, true, false)
+                if not path then return end
 
-            local lines = read_file_lines(path)
-            if not lines then return end
+                local lines = read_file_lines(path)
+                if not lines then return end
 
-            local ft = vim.filetype.match({ filename = path }) or "text"
-            if entry.replace_spec and entry.replace_spec.is_replace then
-                local spec = entry.replace_spec
-                local new_lines = {}
-                local sub_flags = build_substitute_flags(spec.flags)
-                for _, line in ipairs(lines) do
-                    table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, sub_flags))
-                end
-                local hunks = collect_changed_hunks(lines, new_lines)
-                if #hunks > 0 then
-                    render_replace_diff(self.state.bufnr, lines, new_lines, hunks, spec, ft)
+                local ft = vim.filetype.match({ filename = path }) or "text"
+                if entry.replace_spec and entry.replace_spec.is_replace then
+                    local spec = entry.replace_spec
+                    -- This check is only for the type checker
+                    if spec == nil then return end
+
+                    --- @type string[]
+                    local new_lines = {}
+                    local sub_flags = build_substitute_flags(spec.flags)
+                    for _, line in ipairs(lines) do
+                        table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, sub_flags))
+                    end
+                    local hunks = collect_changed_hunks(lines, new_lines)
+                    if #hunks > 0 then
+                        render_replace_diff(self.state.bufnr, lines, new_lines, hunks, spec, ft)
+                    else
+                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                    end
                 else
-                    vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                    local hunks = collect_hunks(lines, entry.prompt)
+                    if #hunks > 0 then
+                        render_diff(self.state.bufnr, lines, hunks, entry.prompt, ft)
+                    else
+                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                    end
                 end
-            else
-                local hunks = collect_hunks(lines, entry.prompt)
-                if #hunks > 0 then
-                    render_diff(self.state.bufnr, lines, hunks, entry.prompt, ft)
-                else
-                    vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-                end
-            end
-        end,
+            end,
     })
 end)()
 
 --- Create a finder that runs live grep (or substitute-style search) depending on prompt.
---- @return any Finder
+--- @return table Finder
 local function live_grep_files()
     local entry_maker, set_prompt = create_file_entry_maker()
-    local command_generator = function(prompt)
-        if not prompt or prompt == "" then return nil end
-        local parsed = parse_prompt_regex(prompt)
-        if parsed and parsed.is_replace then
-            set_prompt(parsed.search, parsed)
-            return vim.tbl_flatten({ conf.vimgrep_arguments, "--", parsed.search })
-        else
-            set_prompt(prompt, nil)
-            return vim.tbl_flatten({ conf.vimgrep_arguments, "--", prompt })
+    local command_generator =
+    --- @param prompt string
+        function(prompt)
+            if not prompt or prompt == "" then return nil end
+            local parsed = parse_prompt_regex(prompt)
+            if parsed and parsed.is_replace then
+                set_prompt(parsed.search, parsed)
+                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", parsed.search })
+            else
+                set_prompt(prompt, nil)
+                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", prompt })
+            end
         end
-    end
     return finders.new_job(command_generator, entry_maker, nil, vim.loop.cwd())
 end
 
 --- Apply the replacement spec to the given entry's file.
---- @param entry table|TelescopeReplaceEntry
+--- @param entry TelescopeReplaceEntry
 --- @return boolean ok True on success.
 --- @return string|nil err Error message if not ok.
 local function apply_replacement_to_file(entry)
@@ -428,8 +444,12 @@ local function search_replace()
         finder = live_grep_files(),
         previewer = grep_buffer_previewer,
         sorter = sorters.highlighter_only({}),
-        attach_mappings = function(prompt_bufnr)
+        attach_mappings =
+        --- @param prompt_bufnr number
+        --- @return boolean
+        function(prompt_bufnr)
             actions.select_default:replace(function()
+                --- @type TelescopeReplaceEntry
                 local entry = action_state.get_selected_entry()
                 if not entry then return actions.close(prompt_bufnr) end
                 actions.close(prompt_bufnr)
