@@ -1,65 +1,70 @@
 require("bufferline").setup({
     options = {
         diagnostics = "nvim_lsp",
-        buffer_close_icon = "×",
         close_command = "bdelete %d",
+        right_mouse_command = "bdelete! %d",
+
         close_icon = "×",
-        left_trunc_marker = "",
-        right_trunc_marker = "",
+        buffer_close_icon = "×",
+        left_trunc_marker = "",
+        right_trunc_marker = "",
         modified_icon = "●",
-        indicator = {
-            style = "underline",
-        },
+
+        show_tab_indicators = true,
+
         hover = {
             enabled = true,
             delay = 10,
             reveal = { 'close' }
         },
+
         offsets = { { filetype = "NvimTree", text = "Workspace", text_align = "center" } },
-        right_mouse_command = "bdelete! %d",
         show_close_icon = false,
-        show_tab_indicators = true,
     },
     highlights = {
-        fill = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "StatusLineNC" },
-        },
-        background = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "StatusLine" },
-        },
-        buffer_visible = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "Normal" },
-        },
+        fill = { bg = "#1e1e1e" },
+        background = { fg = "#808080", },
+        buffer_visible = { fg = "#a0a0a0", },
         buffer_selected = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "Normal" },
+            fg = "#ffffff",
+            bg = "#252526",
+            bold = true,
+            underline = true,
         },
-        separator = {
-            fg = { attribute = "bg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "StatusLine" },
+        modified = { fg = "#808080", },
+        modified_selected = {
+            fg = "#ffffff",
+            bg = "#252526",
+            bold = true,
+            underline = true,
+
         },
+        separator = { fg = "#2d2d2d", },
         separator_selected = {
-            fg = { attribute = "fg", highlight = "Special" },
-            bg = { attribute = "bg", highlight = "Normal" },
+            fg = "#2d2d2d",
+            bg = "#252526",
+            bold = true,
+            underline = true,
+
         },
-        separator_visible = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "StatusLineNC" },
-        },
-        close_button = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "StatusLine" },
-        },
+        close_button = { fg = "#808080", },
         close_button_selected = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "Normal" },
+            fg = "#ffffff",
+            bg = "#252526",
+            bold = true,
+            underline = true,
         },
-        close_button_visible = {
-            fg = { attribute = "fg", highlight = "Normal" },
-            bg = { attribute = "bg", highlight = "Normal" },
-        },
-    },
+
+        error = { fg = "#e1554f" },
+        error_selected = { fg = "#e1554f", bold = true, underline = true },
+
+        warning = { fg = "#dcdcaf" },
+        warning_selected = { fg = "#dcdcaf", bold = true, underline = true },
+
+        info = { fg = "#3678c4" },
+        info_selected = { fg = "#3678c4", bold = true, underline = true },
+
+        hint = { fg = "#74985d" },
+        hint_selected = { fg = "#74985d", bold = true, underline = true },
+    }
 })
