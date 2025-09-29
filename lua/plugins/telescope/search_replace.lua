@@ -226,7 +226,7 @@ local function render_diff(bufnr, lines, hunks, prompt, filetype)
         for line = hunk.start, hunk.finish do
             local text = lines[line]
             local matched = pattern:match_str(text) ~= nil
-            table.insert(out, (matched and "+" or " ") .. text)
+            table.insert(out, text)
             line_map[#out] = { lnum = line, matched = matched }
         end
     end
@@ -237,7 +237,8 @@ local function render_diff(bufnr, lines, hunks, prompt, filetype)
 
     for i, meta in pairs(line_map) do
         if meta.matched then
-            highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 1, "TelescopeMatching")
+            vim.api.nvim_buf_add_highlight(bufnr, -1, "Search", i - 1, 0, -1)
+            highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 0, "TelescopeMatching")
         end
     end
 end
