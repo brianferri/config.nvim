@@ -193,13 +193,14 @@ end
 --- @param line_num integer
 --- @param pattern vim.regex
 --- @param offset integer
-local function highlight_matches(bufnr, line, line_num, pattern, offset)
+--- @param hl_group string
+local function highlight_matches(bufnr, line, line_num, pattern, offset, hl_group)
     local j = 0
     while j < #line do
         local start, finish = pattern:match_str(line:sub(j + 1))
         if not start then break end
         start, finish = start + j, finish + j
-        vim.api.nvim_buf_add_highlight(bufnr, -1, "TelescopeMatching", line_num, start + offset, finish + offset)
+        vim.api.nvim_buf_add_highlight(bufnr, -1, hl_group, line_num, start + offset, finish + offset)
         j = finish
     end
 end
@@ -236,8 +237,7 @@ local function render_diff(bufnr, lines, hunks, prompt, filetype)
 
     for i, meta in pairs(line_map) do
         if meta.matched then
-            vim.api.nvim_buf_add_highlight(bufnr, -1, "DiffAdd", i - 1, 0, -1)
-            highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 1)
+            highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 1, "TelescopeMatching")
         end
     end
 end
@@ -273,15 +273,19 @@ local function render_replace_diff(bufnr, orig_lines, new_lines, hunks, replace_
     vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
     preview_utils.ts_highlighter(bufnr, filetype)
 
-    local pattern_ok, pattern = pcall(vim.regex, replace_spec.search)
     for i, meta in pairs(line_map) do
         if meta.kind == "add" then
+            local neg_pattern_ok, neg_pattern = pcall(vim.regex, replace_spec.replace)
             vim.api.nvim_buf_add_highlight(bufnr, -1, "DiffAdd", i - 1, 0, -1)
-            if pattern_ok then
-                highlight_matches(bufnr, meta.text, i - 1, pattern, 1)
+            if neg_pattern_ok then
+                highlight_matches(bufnr, meta.text, i - 1, neg_pattern, 1, "Added")
             end
         elseif meta.kind == "del" then
+            local pattern_ok, pattern = pcall(vim.regex, replace_spec.search)
             vim.api.nvim_buf_add_highlight(bufnr, -1, "DiffDelete", i - 1, 0, -1)
+            if pattern_ok then
+                highlight_matches(bufnr, meta.text, i - 1, pattern, 1, "Removed")
+            end
         end
     end
 end
