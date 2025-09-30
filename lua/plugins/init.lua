@@ -10,6 +10,14 @@ return {
         config = true
     },
     {
+        'MeanderingProgrammer/render-markdown.nvim',
+        dependencies = {
+            'nvim-tree/nvim-web-devicons',
+            'nvim-treesitter/nvim-treesitter',
+        },
+        config = function () require "configs.render-markdown" end
+    },
+    {
         "akinsho/bufferline.nvim",
         version = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
