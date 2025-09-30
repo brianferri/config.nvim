@@ -27,6 +27,8 @@ vim.api.nvim_create_autocmd('BufEnter', {
 -- Better Comments
 -----------------------------------------------------------
 
+local ns = vim.api.nvim_create_namespace("BetterComments")
+
 --- @type table<string, vim.api.keyset.highlight>
 local comment_hls = {
     ["?"]    = { fg = "#00aaff" }, -- ?
@@ -57,13 +59,15 @@ local function highlight_comments(bufnr)
     if not parser then return end
 
     local root = parser:parse()[1]:root()
+    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+
     for _, node in query:iter_captures(root, bufnr, 0, -1) do
         local text = vim.treesitter.get_node_text(node, bufnr)
         local line, col = node:range()
 
         for pat, _ in pairs(comment_hls) do
             if text:match(pat) then
-                vim.api.nvim_buf_add_highlight(bufnr, -1, hl_group_name(pat), line, col, -1)
+                vim.api.nvim_buf_add_highlight(bufnr, ns, hl_group_name(pat), line, col, -1)
                 break
             end
         end
@@ -71,7 +75,7 @@ local function highlight_comments(bufnr)
 end
 
 local group = vim.api.nvim_create_augroup("BetterComments", { clear = true })
-vim.api.nvim_create_autocmd({ "BufEnter" }, {
+vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "TextChangedI" }, {
     group = group,
     callback = function(args) highlight_comments(args.buf) end,
 })
