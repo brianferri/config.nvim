@@ -60,11 +60,6 @@ return {
         config = function() require "configs.cmp" end
     },
     {
-        "Mofiqul/vscode.nvim",
-        priority = 1000,
-        config = function() require "configs.vscode-theme" end
-    },
-    {
         "voldikss/vim-floaterm"
     },
     {
@@ -96,6 +91,11 @@ return {
         config = function() require "nvim-surround".setup() end
     },
     -- Setup Specific Plugins
+    {
+        "Mofiqul/vscode.nvim",
+        priority = 1000,
+        config = function() require "configs.vscode-theme" end
+    },
     {
         "norcalli/nvim-colorizer.lua",
         config = function() require "colorizer".setup() end,
