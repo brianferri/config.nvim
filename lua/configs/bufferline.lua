@@ -1,8 +1,16 @@
+--- @param bufnr integer
+local function close_buf(bufnr)
+    if bufnr == vim.api.nvim_get_current_buf() then
+        vim.cmd("bp")
+    end
+    vim.cmd("bd " .. bufnr)
+end
+
 require("bufferline").setup({
     options = {
         diagnostics = "nvim_lsp",
-        close_command = "bdelete %d",
-        right_mouse_command = "bdelete! %d",
+        close_command = close_buf,
+        right_mouse_command = close_buf,
 
         close_icon = "×",
         buffer_close_icon = "×",
