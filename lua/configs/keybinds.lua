@@ -87,12 +87,13 @@ map('v', '<M-x>', '"+d<ESC>i', "Cut")
 map('v', '<M-c>', '"+y<ESC>i', "Copy")
 
 -- LSP Bindings
-map(all_modes, '<M-k>', function() vim.lsp.buf.hover { border = 'rounded' } end, "LSP Hover")
-map(all_modes, '<M-C-k>', vim.lsp.buf.references, "LSP References")
-map(all_modes, '<C-k>', vim.lsp.buf.implementation, "LSP Implementation")
 map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
-map(all_modes, '<M-S-i>', function() vim.lsp.buf.format { async = true } end, "LSP Format")
+map(all_modes, '<M-C-k>', vim.lsp.buf.references, "LSP References")
+
+map(all_modes, '<M-S-i>', function() vim.lsp.buf.format({ async = true }) end, "LSP Format")
+map(all_modes, '<M-k>', function() vim.lsp.buf.hover({ border = 'rounded' }) end, "LSP Hover")
+map(all_modes, '<C-k>', function() vim.lsp.buf.implementation({ reuse_win = true }) end, "LSP Implementation")
 
 -- Diagnostics
 map(all_modes, '<M-e>', vim.diagnostic.open_float, "Open Diagnostics")
