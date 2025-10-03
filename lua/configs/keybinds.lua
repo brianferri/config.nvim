@@ -1,5 +1,13 @@
-local map = function(mode, lhs, rhs, desc)
-    vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, desc = desc })
+--- Shorthand keymap set
+--- @param mode string|string[]
+--- @param lhs string
+--- @param rhs string|function
+--- @param desc string
+--- @param opts vim.keymap.set.Opts|nil
+local map = function(mode, lhs, rhs, desc, opts)
+    local conf = { noremap = true, silent = true, desc = desc }
+    if opts then vim.tbl_deep_extend('force', conf, opts) end
+    vim.keymap.set(mode, lhs, rhs, conf)
 end
 
 vim.o.keymodel = "startsel,stopsel"
@@ -42,7 +50,6 @@ map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
 map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
 -- Select All, Move Lines, Selection Manipulation
--- TODO add comment on selection/line
 map(all_modes, '<M-a>', "<ESC>ggVG", "Select All")
 
 map({ 'i', 'n' }, '<M-C-S-Up>', '<ESC>yyP', "Duplicate Line Up")
@@ -76,6 +83,10 @@ map('v', '[', "<Plug>(nvim-surround-visual)]", "Surround Selection With `[]`")
 map('v', '{', "<Plug>(nvim-surround-visual)}", "Surround Selection With `{}`")
 map('v', "'", "<Plug>(nvim-surround-visual)'", "Surround Selection With `''`")
 map('v', '"', '<Plug>(nvim-surround-visual)"', 'Surround Selection With `""`')
+
+local comment = function() return require('vim._comment').operator() .. '_' end
+map({ 'i', 'n' }, '<M-/>', '<ESC>' .. comment(), "Toggle Comment", { expr = true })
+map('v', '<M-/>', comment(), "Toggle Comment", { expr = true })
 
 -- Copy/Cut/Paste/Undo/Redo
 map(all_modes, '<M-v>', '<ESC>pa', "Paste")
