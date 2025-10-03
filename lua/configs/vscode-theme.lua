@@ -63,13 +63,18 @@ local function highlight_comments(bufnr)
 
     for _, node in query:iter_captures(root, bufnr, 0, -1) do
         local text = vim.treesitter.get_node_text(node, bufnr)
-        local line, col = node:range()
-
-        for pat, _ in pairs(comment_hls) do
-            if text:match(pat) then
-                vim.api.nvim_buf_add_highlight(bufnr, ns, hl_group_name(pat), line, col, -1)
-                break
+        local i = 0
+        for line in text:gmatch("[^\n]+") do
+            if #line > 1024 then goto continue end
+            for pat, _ in pairs(comment_hls) do
+                if line:match(pat) then
+                    local linenr, col = node:range()
+                    vim.api.nvim_buf_add_highlight(bufnr, ns, hl_group_name(pat), linenr + i, col, -1)
+                    break
+                end
             end
+            ::continue::
+            i = i + 1
         end
     end
 end
