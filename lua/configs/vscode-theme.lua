@@ -60,7 +60,7 @@ end
 
 --- @param bufnr integer
 local function highlight_comments(bufnr)
-    local lang = vim.api.nvim_buf_get_option(bufnr, "filetype")
+    local lang = vim.bo[bufnr].filetype
     local ok, query = pcall(vim.treesitter.query.parse, lang, "(comment) @c")
     if not ok then return end
 
