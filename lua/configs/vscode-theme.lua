@@ -37,6 +37,12 @@ local comment_hls = {
     ["TODO"] = { fg = "#cccc00" }, -- TODO
 }
 
+--- Global options to apply to the highlight groups
+--- @type vim.api.keyset.highlight
+local hl_opts = {}
+
+--- Some characters are invalid for hl group names
+--- `BetterComment_?` would error, so we generate a unique name for it instead
 --- @param marker string
 --- @return string
 local function hl_group_name(marker)
@@ -46,7 +52,10 @@ local function hl_group_name(marker)
 end
 
 for marker, hl in pairs(comment_hls) do
-    vim.api.nvim_set_hl(0, hl_group_name(marker), hl)
+    vim.api.nvim_set_hl(
+        0, hl_group_name(marker),
+        vim.tbl_extend('keep', hl, hl_opts)
+    )
 end
 
 --- @param bufnr integer
