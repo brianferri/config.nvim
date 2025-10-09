@@ -29,17 +29,15 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
 local ns = vim.api.nvim_create_namespace("BetterComments")
 
---- @type table<string, vim.api.keyset.highlight>
+--- @alias BetterCommentsConfig table<string, vim.api.keyset.highlight>
+
+--- @type BetterCommentsConfig
 local comment_hls = {
     ["?"]    = { fg = "#00aaff" }, -- ?
     ["*"]    = { fg = "#66bb00" }, -- *
     ["!"]    = { fg = "#ff6600" }, -- !
     ["TODO"] = { fg = "#cccc00" }, -- TODO
 }
-
---- Global options to apply to the highlight groups
---- @type vim.api.keyset.highlight
-local hl_opts = {}
 
 --- Some characters are invalid for hl group names
 --- `BetterComment_?` would error, so we generate a unique name for it instead
@@ -51,11 +49,11 @@ local function hl_group_name(marker)
     end)
 end
 
-for marker, hl in pairs(comment_hls) do
-    vim.api.nvim_set_hl(
-        0, hl_group_name(marker),
-        vim.tbl_extend('keep', hl, hl_opts)
-    )
+--- @param hl_groups BetterCommentsConfig
+local function set_hl_groups(hl_groups)
+    for marker, hl in pairs(hl_groups) do
+        vim.api.nvim_set_hl(0, hl_group_name(marker), hl)
+    end
 end
 
 --- @param bufnr integer
@@ -89,6 +87,7 @@ local function highlight_comments(bufnr)
 end
 
 local group = vim.api.nvim_create_augroup("BetterComments", { clear = true })
+set_hl_groups(comment_hls)
 vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "TextChangedI" }, {
     group = group,
     callback = function(args) highlight_comments(args.buf) end,
