@@ -71,6 +71,8 @@ local function highlight_comments(bufnr)
     for _, node in query:iter_captures(root, bufnr, 0, -1) do
         local text = vim.treesitter.get_node_text(node, bufnr)
         local i = 0
+        -- ? We want to handle each line separately, allowing us to encode
+        -- ? meaning, potentially, in different lines of a multiline comment
         for line in text:gmatch("[^\n]+") do
             if #line > 1024 then goto continue end
             for pat, _ in pairs(comment_hls) do
