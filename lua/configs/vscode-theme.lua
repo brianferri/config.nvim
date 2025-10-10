@@ -77,8 +77,12 @@ local function highlight_comments(bufnr)
             if #line > 1024 then goto continue end
             for pat, _ in pairs(comment_hls) do
                 if line:match(pat) then
-                    local linenr, col = node:range()
-                    vim.api.nvim_buf_add_highlight(bufnr, ns, hl_group_name(pat), linenr + i, col, -1)
+                    local linenr, col, elinenr, ecol = node:range()
+                    vim.api.nvim_buf_set_extmark(bufnr, ns, linenr + i, col, {
+                        end_col = ecol,
+                        end_line = elinenr,
+                        hl_group = hl_group_name(pat),
+                    })
                     break
                 end
             end
