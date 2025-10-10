@@ -15,8 +15,8 @@ local all_modes = { 'i', 'n', 'v' }
 
 -- Core Telescope and File Navigation
 map(all_modes, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
-map(all_modes, '<C-g>', "<CMD>FloatermNew --height=0.9 --width=0.8 lazygit<CR>", "Open LazyGit")
-map(all_modes, '<C-,>', "<CMD>FloatermNew nvim ~/.config/nvim<CR>", "Open Nvim Config")
+map(all_modes, '<C-g>', "<CMD>FloatermNew --title=LazyGit --height=0.9 --width=0.8 lazygit<CR>", "Open LazyGit")
+map(all_modes, '<C-,>', "<CMD>FloatermNew --title=NvimConfig --height=0.9 --width=0.8 nvim ~/.config/nvim<CR>", "Open Nvim Config")
 map(all_modes, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
 map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
 map(all_modes, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
