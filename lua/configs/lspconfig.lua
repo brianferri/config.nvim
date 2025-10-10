@@ -14,6 +14,7 @@ require("mason-lspconfig").setup({
         "cssls",
         "gopls",
         "pyright",
+        "intelephense",
         "phpactor",
         "tailwindcss",
         "asm_lsp",
