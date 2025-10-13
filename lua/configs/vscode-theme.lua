@@ -83,7 +83,7 @@ local function highlight_comments(bufnr)
         for line in text:gmatch("[^\n]+") do
             if #line > 1024 then goto continue end
             for pattern, _ in pairs(comment_hls) do
-                for padding, hl_comment_text in line:gmatch("(.*)(" .. pattern .. "[^\n]+)$") do
+                for padding, hl_comment_text in line:gmatch("(.*)(" .. pattern .. ".*)$") do
                     local start_col = (i > 0) and #padding or col
                     local end_col = start_col + ((i > 0) and #hl_comment_text or #line)
                     vim.api.nvim_buf_set_extmark(bufnr, ns, linenr + i, start_col, {
