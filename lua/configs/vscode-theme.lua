@@ -28,6 +28,10 @@ vim.api.nvim_create_autocmd('BufEnter', {
 -----------------------------------------------------------
 
 vim.hl.priorities.semantic_tokens = 75
+require("plugins.treesitter.patch_priorities").override({
+    lua = { ["comment.documentation"] = 98 },
+    ["*"] = { comment = 98 }
+})
 
 local ns = vim.api.nvim_create_namespace("BetterComments")
 
@@ -86,7 +90,6 @@ local function highlight_comments(bufnr)
                         end_col = end_col,
                         hl_group = hl_group_name(pattern),
                         -- ! We don't want to override all treesitter highlighting (default 100) just the `@comment`
-                        -- TODO: Lower the `@comment` priority to 98
                         priority = 99,
                     })
                     goto continue
