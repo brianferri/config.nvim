@@ -29,8 +29,10 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
 vim.hl.priorities.semantic_tokens = 75
 require("plugins.treesitter.patch_priorities").override({
-    lua = { ["comment.documentation"] = 98 },
-    ["*"] = { comment = 98 }
+    ["*"] = {
+        comment = 98,
+        ["comment.documentation"] = 98,
+    }
 })
 
 local ns = vim.api.nvim_create_namespace("BetterComments")
