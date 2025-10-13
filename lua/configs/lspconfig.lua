@@ -17,7 +17,6 @@ require("mason-lspconfig").setup({
         "intelephense",
         "phpactor",
         "tailwindcss",
-        "asm_lsp",
         "bashls",
         "emmet_language_server",
         "eslint",
