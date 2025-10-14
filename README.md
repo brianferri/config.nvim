@@ -71,7 +71,10 @@ Here are some of the modules and what they typically handle:
 Plugin extension modules:
 
 * `plugins/dap/run.lua`: extra commands or helpers to launch / run debugging sessions
-* `plugins/telescope/open_recent.lua`, `search_replace.lua`: custom telescope pickers or workflows
+* `plugins/telescope/`
+  * `open_recent.lua`: open recently viewed files
+  * `search_replace.lua`: search (and replace) diff view
+* `plugins/treesitter/patch_priorities.lua`: a monkey patch to override treesitter extmark priority metadata
 
 ## Usage Tips
 
