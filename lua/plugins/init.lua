@@ -5,6 +5,12 @@ return {
         config = function() require "configs.telescope" end
     },
     {
+        "3rd/image.nvim",
+        build = false,
+        opts = { processor = "magick_cli" },
+        dependencies = { "nvim-telescope/telescope.nvim" }
+    },
+    {
         "akinsho/git-conflict.nvim",
         version = "*",
         config = true
@@ -15,7 +21,7 @@ return {
             'nvim-tree/nvim-web-devicons',
             'nvim-treesitter/nvim-treesitter',
         },
-        config = function () require "configs.render-markdown" end
+        config = function() require "configs.render-markdown" end
     },
     {
         "akinsho/bufferline.nvim",
@@ -98,7 +104,6 @@ return {
         event = "VeryLazy",
         config = function() require "nvim-surround".setup() end
     },
-    -- Setup Specific Plugins
     {
         "Mofiqul/vscode.nvim",
         priority = 1000,
