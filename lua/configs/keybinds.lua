@@ -74,8 +74,8 @@ map('i', '<M-Del>', '<Right><ESC>dei', "Delete Word After Cursor")
 
 map('v', '<Tab>', ">gv", "Indent Selection")
 map('v', '<S-Tab>', "<gv", "Unindent Selection")
-map('v', '<BS>', 'd', "Delete Selection")
-map('v', '<DEL>', 'd', "Delete Selection")
+map('v', '<BS>', '"_d', "Delete Selection")
+map('v', '<DEL>', '"_d', "Delete Selection")
 
 map('v', '<', "<Plug>(nvim-surround-visual)>", "Surround Selection With `<>`")
 map('v', '(', "<Plug>(nvim-surround-visual))", "Surround Selection With `()`")
@@ -89,7 +89,9 @@ map({ 'i', 'n' }, '<M-/>', '<ESC>' .. comment(), "Toggle Comment", { expr = true
 map('v', '<M-/>', comment(), "Toggle Comment", { expr = true })
 
 -- Copy/Cut/Paste/Undo/Redo
-map(all_modes, '<M-v>', '<ESC>pa', "Paste")
+map({ 'i', 'n' }, '<M-v>', '<ESC>"+pa', "Paste")
+map('v', '<M-v>', '"+pa', "Paste")
+
 map(all_modes, '<M-z>', '<ESC>ui', "Undo")
 map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
