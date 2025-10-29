@@ -6,8 +6,8 @@ local M = {}
 local user_priorities = {}
 
 --- Monkey patch treesitter capture iteration to inject priority metadata.
---- @see https://github.com/nvim-treesitter/nvim-treesitter/discussions/7816
---- @see https://github.com/memchr/nvim/commit/e143f6101aac24d008481c264f7ad850d753c223
+--- @see NeoVimTS [Override highlight priority of existing capture group without redefinition.](https://github.com/nvim-treesitter/nvim-treesitter/discussions/7816)
+--- @see memchr [Original Source](https://github.com/memchr/nvim/commit/e143f6101aac24d008481c264f7ad850d753c223)
 --- @param Query vim.treesitter.Query
 local function patch_query(Query)
     local original_iter = Query.iter_captures
