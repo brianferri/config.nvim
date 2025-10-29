@@ -54,8 +54,8 @@ map(all_modes, '<M-a>', "<ESC>ggVG", "Select All")
 
 map({ 'i', 'n' }, '<M-C-S-Up>', '<ESC>yyP', "Duplicate Line Up")
 map({ 'i', 'n' }, '<M-C-S-Down>', '<ESC>yyp', "Duplicate Line Down")
-map('v', '<M-C-S-Up>', ":t '<-1<CR>gv=gv", "Duplicate Selection Up")
-map('v', '<M-C-S-Down>', ":t '>+0<CR>gv=gv", "Duplicate Selection Down")
+map('v', '<M-C-S-Up>', ":t '>+0<CR>gv=gv", "Duplicate Selection Up")
+map('v', '<M-C-S-Down>', ":t '<-1<CR>gv=gv", "Duplicate Selection Down")
 
 map({ 'i', 'n' }, '<M-Up>', '<CMD>m .-2<CR>', "Move Line Up")
 map({ 'i', 'n' }, '<M-Down>', '<CMD>m .+1<CR>', "Move Line Down")
