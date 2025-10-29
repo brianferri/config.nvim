@@ -8,6 +8,6 @@ vim.api.nvim_create_autocmd('BufEnter', {
     ]]
 })
 vim.api.nvim_create_user_command("RemoveTrailing",
-    [[%s/\_s\+$//e]],
+    [[ silent keeppatterns %s/\s\+$//e ]],
     { desc = "Remove Trailing Whitespaces" }
 )
