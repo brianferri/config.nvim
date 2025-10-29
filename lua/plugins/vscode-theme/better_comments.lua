@@ -79,7 +79,7 @@ local function parse_format_comments(comments)
             start          = flags:find("s") ~= nil,
             middle         = flags:find("m") ~= nil,
             ending         = flags:find("e") ~= nil,
-            left_align     = (flags:find("l") ~= nil) or flags:find("[sme]") ~= nil and (not flags:find("[rl]")),
+            left_align     = flags:find("l") ~= nil or (flags:find("[sme]") ~= nil and not flags:find("[rl]")),
             right_align    = flags:find("r") ~= nil,
             omit_for_O     = flags:find("O") ~= nil,
             allow_x_end    = flags:find("x") ~= nil,
