@@ -62,7 +62,7 @@ Here are some of the modules and what they typically handle:
 | `configs/ibl.lua`             | Indentation, blank lines, guides                            |
 | `configs/keybinds.lua`        | Global keymaps and leader mappings                          |
 | `configs/lspconfig.lua`       | Core LSP client / server mapping logic                      |
-| `configs/nvimtree.lua`        | File tree / explorer plugin (e.g. `nvim-tree.lua`)          |
+| `configs/nvimtree.lua`        | File tree / explorer plugin                                 |
 | `configs/render-markdown.lua` | Markdown render / preview settings                          |
 | `configs/telescope.lua`       | Telescope / fuzzy‑finder configuration                      |
 | `configs/treesitter.lua`      | Treesitter syntax parsing / highlighting                    |
@@ -75,6 +75,9 @@ Plugin extension modules:
   * `open_recent.lua`: open recently viewed files
   * `search_replace.lua`: search (and replace) diff view
 * `plugins/treesitter/patch_priorities.lua`: a monkey patch to override treesitter extmark priority metadata
+* `plugins/vscode-theme/`
+  * `better_comments.lua`: Highlights comments according to patterns
+  * `trailing_whitespaces.lua`: Highlights trailing whitespaces and facilitates removal
 
 ## Usage Tips
 
