@@ -97,11 +97,11 @@ end
 
 --- Constructs a pattern to extract padding and text from a comment
 --- @param comment_option CommentOption
---- @param comment_pattern string
+--- @param comment_string string
 --- @return string
-local function construct_comment_pattern(comment_option, comment_pattern)
+local function comment_pattern(comment_option, comment_string)
     local leader = escape_pattern(comment_option.leader)
-    local comment = escape_pattern(comment_pattern)
+    local comment = escape_pattern(comment_string)
     local space = comment_option.flags.requires_blank and "%s+" or "%s*"
 
     local pattern = space .. ")(" .. comment .. ".*"
@@ -140,11 +140,10 @@ local function highlight_comments(bufnr)
         -- ? We want to handle each line separately, allowing us to encode
         -- ? meaning, potentially, in different lines of a multiline comment
         for line in text:gmatch("[^\n]+") do
-            if #line > 1024 then goto continue end
             for pattern, _ in pairs(user_config) do
                 for _, comment_option in ipairs(buffer_format_comments) do
                     -- * This is a single iteration since we're already iterating over single lines
-                    for padding, hl_comment_text in line:gmatch(construct_comment_pattern(comment_option, pattern)) do
+                    for padding, hl_comment_text in line:gmatch(comment_pattern(comment_option, pattern)) do
                         local start_col = (i > 0) and #padding or col
                         local end_col = start_col + ((i > 0) and #hl_comment_text or #line)
                         vim.api.nvim_buf_set_extmark(bufnr, ns, linenr + i, start_col, {
