@@ -43,9 +43,9 @@ return {
     },
     {
         "nvim-treesitter/nvim-treesitter",
-        branch = "master",
+        branch = "main",
         lazy = false,
-        run = ":TSUpdate",
+        build = ":TSUpdate",
         config = function() require "configs.treesitter" end,
     },
     {
