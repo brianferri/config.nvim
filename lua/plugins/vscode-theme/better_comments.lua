@@ -123,7 +123,9 @@ local ns = vim.api.nvim_create_namespace("BetterComments")
 
 --- @param bufnr integer
 local function highlight_comments(bufnr)
-    local lang = vim.bo[bufnr].filetype
+    local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
+    if not lang then return end
+
     local ok, comments = pcall(vim.treesitter.query.parse, lang, "(comment) @comment")
     if not ok then return end
 
