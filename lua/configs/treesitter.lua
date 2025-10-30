@@ -14,3 +14,7 @@ require("nvim-treesitter.configs").setup({
         additional_vim_regex_highlighting = false,
     },
 })
+
+-- ! There is no TS parser available for `sh` file types
+-- ! https://github.com/nvim-treesitter/nvim-treesitter/#adding-parsers
+vim.treesitter.language.register("bash", "sh")
