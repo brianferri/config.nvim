@@ -6,9 +6,24 @@ local function close_buf(bufnr)
     vim.cmd("bd " .. bufnr)
 end
 
+local function diagnostics_indicator(_, _, diagnostics, _)
+    local indicators = " "
+    for level, count in pairs(diagnostics) do
+        local symbol =
+            (level == "error" and "") or
+            (level == "warning" and "") or
+            (level == "info" and "") or
+            ""
+        indicators = indicators .. count .. symbol .. " "
+    end
+    return indicators
+end
+
 require("bufferline").setup({
     options = {
         diagnostics = "nvim_lsp",
+        diagnostics_indicator = diagnostics_indicator,
+
         close_command = close_buf,
         right_mouse_command = close_buf,
 
@@ -63,16 +78,26 @@ require("bufferline").setup({
             underline = true,
         },
 
+        diagnostic = { underline = true },
+        diagnostic_selected = { bold = true, underline = true },
+
         error = { fg = "#e1554f" },
         error_selected = { fg = "#e1554f", bold = true, underline = true },
+        error_diagnostic_selected = { fg = "#e1554f", bold = true, underline = true },
 
         warning = { fg = "#dcdcaf" },
         warning_selected = { fg = "#dcdcaf", bold = true, underline = true },
+        warning_diagnostic_selected = { fg = "#dcdcaf", bold = true, underline = true },
 
         info = { fg = "#3678c4" },
         info_selected = { fg = "#3678c4", bold = true, underline = true },
+        info_diagnostic_selected = { fg = "#3678c4", bold = true, underline = true },
 
         hint = { fg = "#74985d" },
         hint_selected = { fg = "#74985d", bold = true, underline = true },
+        hint_diagnostic_selected = { fg = "#74985d", bold = true, underline = true },
+
+        duplicate = { fg = "#808080" },
+        duplicate_selected = { fg = "#a0a0a0", bold = true, underline = true },
     }
 })
