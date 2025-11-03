@@ -454,19 +454,28 @@ local function search_replace()
         --- @return boolean
         function(prompt_bufnr)
             actions.select_default:replace(function()
-                --- @type TelescopeReplaceEntry
-                local entry = action_state.get_selected_entry()
-                if not entry then return actions.close(prompt_bufnr) end
+                --- @type Picker
+                local picker = action_state.get_current_picker(prompt_bufnr)
+                local selections = picker:get_multi_selection()
+
+                if vim.tbl_isempty(selections) then
+                    --- @type TelescopeReplaceEntry
+                    local entry = action_state.get_selected_entry()
+                    table.insert(selections, entry)
+                end
+
                 actions.close(prompt_bufnr)
-                if entry.replace_spec and entry.replace_spec.is_replace then
-                    local ok, err = apply_replacement_to_file(entry)
-                    if ok then
-                        vim.notify("Replacements applied to " .. (entry.path or entry.value))
+                for _, entry in ipairs(selections) do
+                    if entry.replace_spec and entry.replace_spec.is_replace then
+                        local ok, err = apply_replacement_to_file(entry)
+                        if ok then
+                            vim.notify("Replacements applied to " .. (entry.path or entry.value))
+                        else
+                            vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
+                        end
                     else
-                        vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
+                        vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
                     end
-                else
-                    vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
                 end
             end)
             return true
