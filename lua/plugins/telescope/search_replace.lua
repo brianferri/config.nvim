@@ -201,7 +201,7 @@ local function highlight_matches(bufnr, line, line_num, pattern, offset, hl_grou
         if not start then break end
         start, finish = start + j, finish + j
         vim.api.nvim_buf_add_highlight(bufnr, -1, hl_group, line_num, start + offset, finish + offset)
-        j = finish
+        j = math.max(finish, j + 1)
     end
 end
 
