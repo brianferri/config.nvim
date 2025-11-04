@@ -18,6 +18,7 @@ require("nvim-tree").setup({
         enable = true,
     },
     renderer = {
+        root_folder_label = false,
         indent_markers = {
             enable = true,
         },
