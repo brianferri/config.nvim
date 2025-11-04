@@ -68,16 +68,6 @@ local function get_icon_and_hl(path)
     return icon or "", hl or "Normal"
 end
 
---- Build substitute flags string.
---- @param flags string|nil
---- @return string
-local function build_substitute_flags(flags)
-    local result = ""
-    if flags and flags:find("g") then result = result .. "g" end
-    if flags and flags:find("i") then result = result .. "i" end
-    return result
-end
-
 --- Read all lines from a file.
 --- @param path string
 --- @return string[]|nil
@@ -100,35 +90,32 @@ end
 --- @return ReplaceSpec|nil
 local function parse_prompt_regex(prompt)
     if not prompt or prompt == "" then return nil end
-    if not vim.startswith(prompt, ":s") then return nil end
 
-    local sep = prompt:sub(3, 3)
+    local sr_prefix = ":s"
+    if not vim.startswith(prompt, sr_prefix) then return nil end
+
+    local sep = prompt:sub(#sr_prefix + 1, #sr_prefix + 1)
     if not sep or sep == "" then return nil end
 
     --- @param start_index integer
     --- @return integer|nil
-    local function next_unescaped(start_index)
+    local function next_separator(start_index)
         local idx = start_index
         while idx <= #prompt do
             local ch = prompt:sub(idx, idx)
-            if ch == "\\" then
-                idx = idx + 2
-            elseif ch == sep then
-                return idx
-            else
-                idx = idx + 1
-            end
+            if ch == sep then return idx end
+            idx = idx + 1
         end
         return nil
     end
 
-    local search_start = 4
-    local search_end = next_unescaped(search_start)
+    local search_start = #sr_prefix + 2
+    local search_end = next_separator(search_start)
     if not search_end then return nil end
     local search = prompt:sub(search_start, search_end - 1)
 
     local replace_start = search_end + 1
-    local replace_end = next_unescaped(replace_start)
+    local replace_end = next_separator(replace_start)
     if not replace_end then return nil end
     local replace = prompt:sub(replace_start, replace_end - 1)
 
@@ -165,7 +152,7 @@ end
 --- @return Hunk[]
 local function collect_hunks(lines, prompt)
     --- @type integer[], vim.regex
-    local matches, pattern = {}, vim.regex(vim.pesc(prompt))
+    local matches, pattern = {}, vim.regex(prompt)
     for lnum, line in ipairs(lines) do
         if pattern:match_str(line) then
             table.insert(matches, lnum)
@@ -224,7 +211,7 @@ end
 local function render_diff(bufnr, lines, hunks, prompt, filetype)
     --- @type string[], table<integer, DiffLineMeta>
     local out, line_map = {}, {}
-    local pattern = vim.regex(vim.pesc(prompt))
+    local pattern = vim.regex(prompt)
 
     for _, hunk in ipairs(hunks) do
         table.insert(out, string.format("@@@ -%d,%d +%d,%d @@@",
@@ -359,16 +346,13 @@ local function grep_buffer_preview(self, entry)
     if not lines then return end
 
     local ft = vim.filetype.match({ filename = path }) or "text"
-    if entry.replace_spec and entry.replace_spec.is_replace then
-        local spec = entry.replace_spec
-        -- ? This check is only for the type checker
-        if spec == nil then return end
 
+    local spec = entry.replace_spec
+    if spec and spec.is_replace then
         --- @type string[]
         local new_lines = {}
-        local sub_flags = build_substitute_flags(spec.flags)
         for _, line in ipairs(lines) do
-            table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, sub_flags))
+            table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, spec.flags))
         end
         local hunks = collect_changed_hunks(lines, new_lines)
         if #hunks > 0 then
@@ -409,9 +393,9 @@ local function apply_replacement_to_file(entry)
     local file_lines = read_file_lines(path)
     if not file_lines then return false, "failed to read file" end
 
-    local sub_flags, new_lines, changed = build_substitute_flags(spec.flags), {}, false
+    local new_lines, changed = {}, false
     for _, line in ipairs(file_lines) do
-        local new_line = vim.fn.substitute(line, spec.search, spec.replace, sub_flags)
+        local new_line = vim.fn.substitute(line, spec.search, spec.replace, spec.flags)
         if new_line ~= line then changed = true end
         table.insert(new_lines, new_line)
     end
@@ -479,12 +463,11 @@ local function search_replace_mappings(prompt_bufnr)
     return true
 end
 
-
 --- Open the Search (& Replace) picker.
 --- @return nil
 local function search_replace()
     pickers.new({}, {
-        prompt_title = "Search (& Replace [:s/<search>/<replace>/])",
+        prompt_title = "Search (& Replace `:s/<search>/<replace>/<flags>`)",
         push_cursor_on_edit = true,
         finder = live_grep_files(),
         previewer = grep_buffer_previewer,
@@ -505,3 +488,4 @@ function M.setup(opts)
 end
 
 return M
+
