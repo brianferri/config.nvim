@@ -11,7 +11,7 @@ Its goal is to be clean, maintainable, and easily extendable.
 
 * Neovim 0.11+
 * Language servers, debuggers, etc., installed separately (this config assumes they exist or will be installed via e.g. `mason.nvim`)
-  * You will need `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` to get started with this config
+  * You will need `tree-sitter-cli`, `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` to get started with this config
 
 ## Installation
 
