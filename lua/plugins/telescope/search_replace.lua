@@ -349,72 +349,54 @@ local function create_file_entry_maker()
     return entry_maker, set_prompt
 end
 
+--- @param self {state: {bufnr: integer}}
+--- @param entry TelescopeReplaceEntry
+local function grep_buffer_preview(self, entry)
+    local path = from_entry.path(entry, true, false)
+    if not path then return end
+
+    local lines = read_file_lines(path)
+    if not lines then return end
+
+    local ft = vim.filetype.match({ filename = path }) or "text"
+    if entry.replace_spec and entry.replace_spec.is_replace then
+        local spec = entry.replace_spec
+        -- ? This check is only for the type checker
+        if spec == nil then return end
+
+        --- @type string[]
+        local new_lines = {}
+        local sub_flags = build_substitute_flags(spec.flags)
+        for _, line in ipairs(lines) do
+            table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, sub_flags))
+        end
+        local hunks = collect_changed_hunks(lines, new_lines)
+        if #hunks > 0 then
+            render_replace_diff(self.state.bufnr, lines, new_lines, hunks, spec, ft)
+        else
+            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+        end
+    else
+        local hunks = collect_hunks(lines, entry.prompt)
+        if #hunks > 0 then
+            render_diff(self.state.bufnr, lines, hunks, entry.prompt, ft)
+        else
+            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+        end
+    end
+end
+
 --- Buffer previewer for live grep results with diff/replace rendering.
 --- This is a `telescope.previewers` object.
-local grep_buffer_previewer = (function()
-    local cwd = vim.loop.cwd()
-    return previewers.new_buffer_previewer({
-        dyn_title = function(_, entry) return Path:new(from_entry.path(entry, false, false)):normalize(cwd) end,
-        get_buffer_by_name = function(_, entry) return from_entry.path(entry, false, false) end,
-        define_preview =
-        --- @param self {state: {bufnr: integer}}
-        --- @param entry TelescopeReplaceEntry
-            function(self, entry)
-                local path = from_entry.path(entry, true, false)
-                if not path then return end
-
-                local lines = read_file_lines(path)
-                if not lines then return end
-
-                local ft = vim.filetype.match({ filename = path }) or "text"
-                if entry.replace_spec and entry.replace_spec.is_replace then
-                    local spec = entry.replace_spec
-                    -- This check is only for the type checker
-                    if spec == nil then return end
-
-                    --- @type string[]
-                    local new_lines = {}
-                    local sub_flags = build_substitute_flags(spec.flags)
-                    for _, line in ipairs(lines) do
-                        table.insert(new_lines, vim.fn.substitute(line, spec.search, spec.replace, sub_flags))
-                    end
-                    local hunks = collect_changed_hunks(lines, new_lines)
-                    if #hunks > 0 then
-                        render_replace_diff(self.state.bufnr, lines, new_lines, hunks, spec, ft)
-                    else
-                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-                    end
-                else
-                    local hunks = collect_hunks(lines, entry.prompt)
-                    if #hunks > 0 then
-                        render_diff(self.state.bufnr, lines, hunks, entry.prompt, ft)
-                    else
-                        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-                    end
-                end
-            end,
-    })
-end)()
-
---- Create a finder that runs live grep (or substitute-style search) depending on prompt.
---- @return table Finder
-local function live_grep_files()
-    local entry_maker, set_prompt = create_file_entry_maker()
-    local command_generator =
-    --- @param prompt string
-        function(prompt)
-            if not prompt or prompt == "" then return nil end
-            local parsed = parse_prompt_regex(prompt)
-            if parsed and parsed.is_replace then
-                set_prompt(parsed.search, parsed)
-                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", parsed.search })
-            else
-                set_prompt(prompt, nil)
-                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", prompt })
-            end
-        end
-    return finders.new_job(command_generator, entry_maker, nil, vim.loop.cwd())
-end
+local grep_buffer_previewer = previewers.new_buffer_previewer({
+    dyn_title = function(_, entry)
+        return Path:new(from_entry.path(entry, false, false)):normalize(vim.loop.cwd())
+    end,
+    get_buffer_by_name = function(_, entry)
+        return from_entry.path(entry, false, false)
+    end,
+    define_preview = grep_buffer_preview,
+})
 
 --- Apply the replacement spec to the given entry's file.
 --- @param entry TelescopeReplaceEntry
@@ -446,6 +428,58 @@ end
 -- Picker
 -----------------------------------------------------------
 
+--- Create a finder that runs live grep (or substitute-style search) depending on prompt.
+--- @return table Finder
+local function live_grep_files()
+    local entry_maker, set_prompt = create_file_entry_maker()
+    local command_generator =
+    --- @param prompt string
+        function(prompt)
+            if not prompt or prompt == "" then return nil end
+            local parsed = parse_prompt_regex(prompt)
+            if parsed and parsed.is_replace then
+                set_prompt(parsed.search, parsed)
+                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", parsed.search })
+            else
+                set_prompt(prompt, nil)
+                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", prompt })
+            end
+        end
+    return finders.new_job(command_generator, entry_maker, nil, vim.loop.cwd())
+end
+
+--- @param prompt_bufnr number
+--- @return boolean
+local function search_replace_mappings(prompt_bufnr)
+    actions.select_default:replace(function()
+        --- @type Picker
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local selections = picker:get_multi_selection()
+
+        if vim.tbl_isempty(selections) then
+            --- @type TelescopeReplaceEntry
+            local entry = action_state.get_selected_entry()
+            table.insert(selections, entry)
+        end
+
+        actions.close(prompt_bufnr)
+        for _, entry in ipairs(selections) do
+            if entry.replace_spec and entry.replace_spec.is_replace then
+                local ok, err = apply_replacement_to_file(entry)
+                if ok then
+                    vim.notify("Replacements applied to " .. (entry.path or entry.value))
+                else
+                    vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
+                end
+            else
+                vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
+            end
+        end
+    end)
+    return true
+end
+
+
 --- Open the Search (& Replace) picker.
 --- @return nil
 local function search_replace()
@@ -455,37 +489,7 @@ local function search_replace()
         finder = live_grep_files(),
         previewer = grep_buffer_previewer,
         sorter = sorters.highlighter_only({}),
-        attach_mappings =
-        --- @param prompt_bufnr number
-        --- @return boolean
-        function(prompt_bufnr)
-            actions.select_default:replace(function()
-                --- @type Picker
-                local picker = action_state.get_current_picker(prompt_bufnr)
-                local selections = picker:get_multi_selection()
-
-                if vim.tbl_isempty(selections) then
-                    --- @type TelescopeReplaceEntry
-                    local entry = action_state.get_selected_entry()
-                    table.insert(selections, entry)
-                end
-
-                actions.close(prompt_bufnr)
-                for _, entry in ipairs(selections) do
-                    if entry.replace_spec and entry.replace_spec.is_replace then
-                        local ok, err = apply_replacement_to_file(entry)
-                        if ok then
-                            vim.notify("Replacements applied to " .. (entry.path or entry.value))
-                        else
-                            vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
-                        end
-                    else
-                        vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
-                    end
-                end
-            end)
-            return true
-        end,
+        attach_mappings = search_replace_mappings,
     }):find()
 end
 
