@@ -484,7 +484,7 @@ end
 --- @return nil
 local function search_replace()
     pickers.new({}, {
-        prompt_title = "Search (& Replace)",
+        prompt_title = "Search (& Replace [:s/<search>/<replace>/])",
         push_cursor_on_edit = true,
         finder = live_grep_files(),
         previewer = grep_buffer_previewer,
