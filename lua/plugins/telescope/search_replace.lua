@@ -140,25 +140,38 @@ end
 -- Hunks
 -----------------------------------------------------------
 
+--- Build hunks from a set of interesting line numbers.
+--- @param total_lines integer
+--- @param matches integer[] -- line numbers (1-based) where a match/diff occurred
+--- @return Hunk[]
+local function build_hunks(total_lines, matches)
+    --- @type Hunk[]
+    local hunks = {}
+    for _, lnum in ipairs(matches) do
+        local start = math.max(1, lnum - user_config.context_size)
+        local finish = math.min(total_lines, lnum + user_config.context_size)
+        if #hunks > 0 and start <= hunks[#hunks].finish + 1 then
+            hunks[#hunks].finish = math.max(hunks[#hunks].finish, finish)
+        else
+            table.insert(hunks, { start = start, finish = finish })
+        end
+    end
+    return hunks
+end
+
 --- Collect hunks where a pattern matches.
 --- @param lines string[]
 --- @param prompt string
 --- @return Hunk[]
 local function collect_hunks(lines, prompt)
-    --- @type Hunk[], vim.regex
-    local hunks, pattern = {}, vim.regex(vim.pesc(prompt))
+    --- @type integer[], vim.regex
+    local matches, pattern = {}, vim.regex(vim.pesc(prompt))
     for lnum, line in ipairs(lines) do
         if pattern:match_str(line) then
-            local start = math.max(1, lnum - user_config.context_size)
-            local finish = math.min(#lines, lnum + user_config.context_size)
-            if #hunks > 0 and start <= hunks[#hunks].finish + 1 then
-                hunks[#hunks].finish = math.max(hunks[#hunks].finish, finish)
-            else
-                table.insert(hunks, { start = start, finish = finish })
-            end
+            table.insert(matches, lnum)
         end
     end
-    return hunks
+    return build_hunks(#lines, matches)
 end
 
 --- Collect hunks where lines differ between old and new versions.
@@ -166,21 +179,14 @@ end
 --- @param new_lines string[]
 --- @return Hunk[]
 local function collect_changed_hunks(orig_lines, new_lines)
-    --- @type Hunk[]
-    local hunks = {}
-    for lnum = 1, math.max(#orig_lines, #new_lines) do
-        local orig, new = orig_lines[lnum] or "", new_lines[lnum] or ""
-        if orig ~= new then
-            local start = math.max(1, lnum - user_config.context_size)
-            local finish = math.min(#orig_lines, lnum + user_config.context_size)
-            if #hunks > 0 and start <= hunks[#hunks].finish + 1 then
-                hunks[#hunks].finish = math.max(hunks[#hunks].finish, finish)
-            else
-                table.insert(hunks, { start = start, finish = finish })
-            end
+    --- @type integer[], integer
+    local matches, max_len = {}, math.max(#orig_lines, #new_lines)
+    for lnum = 1, max_len do
+        if (orig_lines[lnum] or "") ~= (new_lines[lnum] or "") then
+            table.insert(matches, lnum)
         end
     end
-    return hunks
+    return build_hunks(#orig_lines, matches)
 end
 
 -----------------------------------------------------------
