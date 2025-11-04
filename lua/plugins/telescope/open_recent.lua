@@ -178,6 +178,28 @@ local function open_path(selection)
     end
 end
 
+--- @param prompt_bufnr number
+--- @return boolean
+local function open_recent_mappings(prompt_bufnr)
+    actions.select_default:replace(function()
+        --- @type Picker
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local selections = picker:get_multi_selection()
+
+        if vim.tbl_isempty(selections) then
+            --- @type TelescopeReplaceEntry
+            local entry = action_state.get_selected_entry()
+            table.insert(selections, entry)
+        end
+
+        actions.close(prompt_bufnr)
+        for _, entry in ipairs(selections) do
+            open_path(entry)
+        end
+    end)
+    return true
+end
+
 local function open_recent()
     local displayer = entry_display.create({
         separator = " ",
@@ -195,13 +217,7 @@ local function open_recent()
         }),
         previewer = ts_buffer_previewer,
         sorter = conf.generic_sorter({}),
-        attach_mappings = function(prompt_bufnr)
-            actions.select_default:replace(function()
-                actions.close(prompt_bufnr)
-                open_path(action_state.get_selected_entry())
-            end)
-            return true
-        end,
+        attach_mappings = open_recent_mappings,
     }):find()
 end
 
