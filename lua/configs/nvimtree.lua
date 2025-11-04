@@ -17,7 +17,19 @@ require("nvim-tree").setup({
     modified = {
         enable = true,
     },
+    view = {
+        number = true,
+        width = {
+            max = 30,
+        },
+    },
+    actions = {
+        open_file = {
+            resize_window = false,
+        },
+    },
     renderer = {
+        full_name = true,
         root_folder_label = false,
         indent_markers = {
             enable = true,
