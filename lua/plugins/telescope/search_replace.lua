@@ -13,6 +13,7 @@ local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
 local devicons = require("nvim-web-devicons")
 
+local ns = vim.api.nvim_create_namespace("SearchReplace")
 local M = {}
 
 --- @class SearchReplaceConfig
@@ -193,7 +194,12 @@ local function highlight_matches(bufnr, line, line_num, pattern, offset, hl_grou
         local start, finish = pattern:match_str(line:sub(j + 1))
         if not start then break end
         start, finish = start + j, finish + j
-        vim.api.nvim_buf_add_highlight(bufnr, -1, hl_group, line_num, start + offset, finish + offset)
+
+        vim.api.nvim_buf_set_extmark(bufnr, ns, line_num, start + offset, {
+            hl_group = hl_group,
+            end_col = finish + offset
+        })
+
         j = math.max(finish, j + 1)
     end
 end
@@ -230,7 +236,10 @@ local function render_diff(bufnr, lines, hunks, prompt, filetype)
 
     for i, meta in pairs(line_map) do
         if meta.matched then
-            vim.api.nvim_buf_add_highlight(bufnr, -1, "Search", i - 1, 0, -1)
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
+                hl_group = "Search",
+                end_col = #lines[meta.lnum],
+            })
             highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 0, "TelescopeMatching")
         end
     end
@@ -270,13 +279,19 @@ local function render_replace_diff(bufnr, orig_lines, new_lines, hunks, replace_
     for i, meta in pairs(line_map) do
         if meta.kind == "add" then
             local neg_pattern_ok, neg_pattern = pcall(vim.regex, replace_spec.replace)
-            vim.api.nvim_buf_add_highlight(bufnr, -1, "DiffAdd", i - 1, 0, -1)
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
+                hl_group = "DiffAdd",
+                end_col = #meta.text + 1,
+            })
             if neg_pattern_ok then
                 highlight_matches(bufnr, meta.text, i - 1, neg_pattern, 1, "Added")
             end
         elseif meta.kind == "del" then
             local pattern_ok, pattern = pcall(vim.regex, replace_spec.search)
-            vim.api.nvim_buf_add_highlight(bufnr, -1, "DiffDelete", i - 1, 0, -1)
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
+                hl_group = "DiffDelete",
+                end_col = #meta.text + 1,
+            })
             if pattern_ok then
                 highlight_matches(bufnr, meta.text, i - 1, pattern, 1, "Removed")
             end
@@ -374,7 +389,7 @@ end
 --- This is a `telescope.previewers` object.
 local grep_buffer_previewer = previewers.new_buffer_previewer({
     dyn_title = function(_, entry)
-        return Path:new(from_entry.path(entry, false, false)):normalize(vim.loop.cwd())
+        return Path:new(from_entry.path(entry, false, false)):normalize(vim.uv.cwd())
     end,
     get_buffer_by_name = function(_, entry)
         return from_entry.path(entry, false, false)
@@ -423,13 +438,13 @@ local function live_grep_files()
             local parsed = parse_prompt_regex(prompt)
             if parsed and parsed.is_replace then
                 set_prompt(parsed.search, parsed)
-                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", parsed.search })
+                return vim.iter({ conf.vimgrep_arguments, "--", parsed.search }):flatten():totable()
             else
                 set_prompt(prompt, nil)
-                return vim.tbl_flatten({ conf.vimgrep_arguments, "--", prompt })
+                return vim.iter({ conf.vimgrep_arguments, "--", prompt }):flatten():totable()
             end
         end
-    return finders.new_job(command_generator, entry_maker, nil, vim.loop.cwd())
+    return finders.new_job(command_generator, entry_maker, nil, vim.uv.cwd())
 end
 
 --- @param prompt_bufnr number
@@ -488,4 +503,3 @@ function M.setup(opts)
 end
 
 return M
-
