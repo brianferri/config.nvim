@@ -103,7 +103,7 @@ end
 --- Previewer: show file info in a buffer
 local previewer = previewers.new_buffer_previewer({
     define_preview = function(self, entry)
-        local stat = vim.loop.fs_stat(entry.path)
+        local stat = vim.uv.fs_stat(entry.path)
         vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {
             "Path: " .. entry.path,
             "Size: " .. (stat and stat.size or "unknown") .. " bytes",
