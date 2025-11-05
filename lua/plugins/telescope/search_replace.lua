@@ -124,6 +124,16 @@ local function parse_prompt_regex(prompt)
     return { is_replace = true, search = search, replace = replace, flags = flags or "" }
 end
 
+--- Sets up a buffer with TS highlighting
+--- @param bufnr integer
+--- @param filetype string
+--- @param lines string[]
+local function setup_buffer(bufnr, filetype, lines)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
+    preview_utils.ts_highlighter(bufnr, filetype)
+end
+
 -----------------------------------------------------------
 -- Hunks
 -----------------------------------------------------------
@@ -208,6 +218,16 @@ end
 -- Diff rendering
 -----------------------------------------------------------
 
+--- Returns a hunk header based on a Hunk
+--- @param hunk Hunk
+local function hunk_header(hunk)
+    return string.format(
+        "@@ -%d,%d +%d,%d @@",
+        hunk.start, hunk.finish - hunk.start + 1,
+        hunk.start, hunk.finish - hunk.start + 1
+    )
+end
+
 --- Render a diff with highlights for matches.
 --- @param bufnr integer
 --- @param lines string[]
@@ -216,30 +236,26 @@ end
 --- @param filetype string
 local function render_diff(bufnr, lines, hunks, prompt, filetype)
     --- @type string[], table<integer, DiffLineMeta>
-    local out, line_map = {}, {}
+    local out, out_meta = {}, {}
     local pattern = vim.regex(prompt)
 
+    local function add_line(text, lnum)
+        table.insert(out, text)
+        out_meta[#out] = { lnum = lnum, matched = pattern:match_str(text) ~= nil }
+    end
+
     for _, hunk in ipairs(hunks) do
-        table.insert(out, string.format("@@@ -%d,%d +%d,%d @@@",
-            hunk.start, hunk.finish - hunk.start + 1, hunk.start, hunk.finish - hunk.start + 1))
+        table.insert(out, hunk_header(hunk))
         for line = hunk.start, hunk.finish do
-            local text = lines[line]
-            local matched = pattern:match_str(text) ~= nil
-            table.insert(out, text)
-            line_map[#out] = { lnum = line, matched = matched }
+            add_line(lines[line] or "", line)
         end
     end
 
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, out)
-    vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
-    preview_utils.ts_highlighter(bufnr, filetype)
+    setup_buffer(bufnr, filetype, out)
 
-    for i, meta in pairs(line_map) do
+    for i, meta in pairs(out_meta) do
         if meta.matched then
-            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
-                hl_group = "Search",
-                end_col = #lines[meta.lnum],
-            })
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, { hl_group = "Search", end_col = #lines[meta.lnum], })
             highlight_matches(bufnr, lines[meta.lnum], i - 1, pattern, 0, "TelescopeMatching")
         end
     end
@@ -254,47 +270,37 @@ end
 --- @param filetype string
 local function render_replace_diff(bufnr, orig_lines, new_lines, hunks, replace_spec, filetype)
     --- @type string[], table<integer, ReplaceDiffMeta>
-    local out, line_map = {}, {}
+    local out, out_meta = {}, {}
+
+    local function add_line(prefix, text, kind)
+        table.insert(out, prefix .. text)
+        out_meta[#out] = { kind = kind, text = text }
+    end
+
     for _, hunk in ipairs(hunks) do
-        table.insert(out, string.format("@@@ -%d,%d +%d,%d @@@",
-            hunk.start, hunk.finish - hunk.start + 1, hunk.start, hunk.finish - hunk.start + 1))
+        table.insert(out, hunk_header(hunk))
         for line = hunk.start, hunk.finish do
-            local old_text, new_text = orig_lines[line] or "", new_lines[line] or ""
-            if old_text ~= new_text then
-                table.insert(out, "-" .. old_text)
-                line_map[#out] = { kind = "del", text = old_text }
-                table.insert(out, "+" .. new_text)
-                line_map[#out] = { kind = "add", text = new_text }
+            local old, new = orig_lines[line] or "", new_lines[line] or ""
+            if old ~= new then
+                if old ~= "" then add_line("-", old, "del") end
+                if new ~= "" then add_line("+", new, "add") end
             else
-                table.insert(out, " " .. old_text)
-                line_map[#out] = { kind = "same", text = old_text }
+                add_line(" ", old, "same")
             end
         end
     end
 
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, out)
-    vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
-    preview_utils.ts_highlighter(bufnr, filetype)
+    setup_buffer(bufnr, filetype, out)
 
-    for i, meta in pairs(line_map) do
+    for i, meta in pairs(out_meta) do
         if meta.kind == "add" then
             local neg_pattern_ok, neg_pattern = pcall(vim.regex, replace_spec.replace)
-            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
-                hl_group = "DiffAdd",
-                end_col = #meta.text + 1,
-            })
-            if neg_pattern_ok then
-                highlight_matches(bufnr, meta.text, i - 1, neg_pattern, 1, "Added")
-            end
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, { hl_group = "DiffAdd", end_col = #meta.text + 1, })
+            if neg_pattern_ok then highlight_matches(bufnr, meta.text, i - 1, neg_pattern, 1, "Added") end
         elseif meta.kind == "del" then
             local pattern_ok, pattern = pcall(vim.regex, replace_spec.search)
-            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
-                hl_group = "DiffDelete",
-                end_col = #meta.text + 1,
-            })
-            if pattern_ok then
-                highlight_matches(bufnr, meta.text, i - 1, pattern, 1, "Removed")
-            end
+            vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, { hl_group = "DiffDelete", end_col = #meta.text + 1, })
+            if pattern_ok then highlight_matches(bufnr, meta.text, i - 1, pattern, 1, "Removed") end
         end
     end
 end
