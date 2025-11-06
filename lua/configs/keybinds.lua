@@ -83,6 +83,7 @@ map('v', '[', "<Plug>(nvim-surround-visual)]", "Surround Selection With `[]`")
 map('v', '{', "<Plug>(nvim-surround-visual)}", "Surround Selection With `{}`")
 map('v', "'", "<Plug>(nvim-surround-visual)'", "Surround Selection With `''`")
 map('v', '"', '<Plug>(nvim-surround-visual)"', 'Surround Selection With `""`')
+map('v', '`', '<Plug>(nvim-surround-visual)`', 'Surround Selection With ``')
 
 local comment = function() return require('vim._comment').operator() .. '_' end
 map({ 'i', 'n' }, '<M-/>', '<ESC>' .. comment(), "Toggle Comment", { expr = true })
