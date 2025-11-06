@@ -10,12 +10,14 @@ Its goal is to be clean, maintainable, and easily extendable.
 ## Requirements
 
 * Neovim 0.11+
-* Language servers, debuggers, etc., installed separately (this config assumes they exist or will be installed via e.g. `mason.nvim`)
-  * You will need `tree-sitter-cli`, `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` to get started with this config
+* Language servers, debuggers, etc., installed separately (this config assumes they exist or will be installed via `mason.nvim`)
+  * You will need `tree-sitter-cli`;
+  - [OPTIONAL] `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` for the default [lsp configs](./lua/configs/lspconfig.lua);
+    - > remove any lsps you don't intend to use/don't want to install the binaries for before running `nvim`
 
 ## Installation
 
-1. Clone this repo into your Neovim config directory (e.g. `~/.config/nvim`):
+1. Clone this repo into your Neovim config directory:
 
    ```bash
    git clone https://github.com/brianferri/config.nvim.git ~/.config/nvim
@@ -46,7 +48,7 @@ You can easily override or add your own config modules:
   * Require the new lsp configuration in `lua/configs/lspconfig.lua`
 * To override existing modules, you can either:
   * Fork and edit the relevant file, or
-  * In your personal config, `require` them and apply patches (e.g. modify the returned table)
+  * In your personal config, `require` them and apply patches
 * For plugin-specific extensions (e.g. custom `telescope` pickers), put files in the `lua/plugins/` area following existing patterns.
 
 ## Plugin Modules / Highlights
