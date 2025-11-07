@@ -233,6 +233,8 @@ local function apply_spec_to_lines(lines, spec)
         if i >= start_line and i <= end_line then
             if spec.is_replace then
                 local new_line = transform(line)
+                    :gsub("\n", "\\n")
+                    :gsub("\r", "\\r")
                 new_lines[i] = new_line
                 if new_line ~= line then
                     table.insert(changed_lines, i)
