@@ -113,18 +113,22 @@ local function parse_prompt_regex(prompt)
         return nil
     end
 
+    -- ? `:s/X`
+    -- ?     ^ -> Is the (#sr_prefix + 2)
     local search_start = #sr_prefix + 2
     local search_end = next_separator(search_start)
     if not search_end then
         return { is_replace = false, search = prompt, replace = "", flags = "" }
     end
 
+    -- ? Skip the separator
     local replace_start = search_end + 1
     local replace_end = next_separator(replace_start)
     if not replace_end then
         return { is_replace = false, search = prompt, replace = "", flags = "" }
     end
 
+    -- ? Skip the separators
     local search = prompt:sub(search_start, search_end - 1)
     local replace = prompt:sub(replace_start, replace_end - 1)
     local flags = prompt:sub(replace_end + 1)
