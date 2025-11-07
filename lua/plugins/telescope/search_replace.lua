@@ -233,6 +233,7 @@ local function apply_spec_to_lines(lines, spec)
         if i >= start_line and i <= end_line then
             if spec.is_replace then
                 local new_line = transform(line)
+                    -- TODO: Eventually this will need to be handled properly to actually split matches in to new lines
                     :gsub("\n", "\\n")
                     :gsub("\r", "\\r")
                 new_lines[i] = new_line
@@ -344,6 +345,7 @@ local function render_diff_preview(bufnr, orig_lines, new_lines, hunks, spec, fi
         for lnum = hunk.start, hunk.finish do
             local old, new = orig_lines[lnum] or "", new_lines[lnum] or ""
             if spec.is_replace and old ~= new then
+                -- TODO: Properly handle empty strings, how should they be handled if they are deleted or just left empty
                 if old ~= "" then orig_count = orig_count + 1 end
                 if new ~= "" then new_count = new_count + 1 end
             else
@@ -360,6 +362,7 @@ local function render_diff_preview(bufnr, orig_lines, new_lines, hunks, spec, fi
         for lnum = hunk.start, hunk.finish do
             local old, new = orig_lines[lnum] or "", new_lines[lnum] or ""
             if spec.is_replace and old ~= new then
+                -- TODO: Properly handle empty strings, how should they be handled if they are deleted or just left empty
                 if old ~= "" then add("-", old, "del") end
                 if new ~= "" then add("+", new, "add") end
             else
