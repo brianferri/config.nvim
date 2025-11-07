@@ -118,15 +118,15 @@ local function parse_prompt_regex(prompt)
     if not search_end then
         return { is_replace = false, search = prompt, replace = "", flags = "" }
     end
-    local search = prompt:sub(search_start, search_end - 1)
 
     local replace_start = search_end + 1
     local replace_end = next_separator(replace_start)
     if not replace_end then
         return { is_replace = false, search = prompt, replace = "", flags = "" }
     end
-    local replace = prompt:sub(replace_start, replace_end - 1)
 
+    local search = prompt:sub(search_start, search_end - 1)
+    local replace = prompt:sub(replace_start, replace_end - 1)
     local flags = prompt:sub(replace_end + 1)
     return { is_replace = true, search = search, replace = replace, flags = flags or "" }
 end
