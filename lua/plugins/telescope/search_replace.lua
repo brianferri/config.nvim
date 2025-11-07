@@ -21,9 +21,11 @@ local M = {}
 
 --- @class ReplaceSpec
 --- @field is_replace boolean
+--- @field range string
 --- @field search string
 --- @field replace string
 --- @field flags string
+--- @field count string -- currently unused
 
 --- @class Hunk
 --- @field start integer
@@ -83,6 +85,20 @@ local function write_file_lines(path, lines)
     return result == 0
 end
 
+--- Sets up a buffer with TS highlighting
+--- @param bufnr integer
+--- @param filetype string
+--- @param lines string[]
+local function setup_buffer(bufnr, filetype, lines)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
+    preview_utils.ts_highlighter(bufnr, filetype)
+end
+
+-----------------------------------------------------------
+-- Parsing
+-----------------------------------------------------------
+
 --- Parse a substitute-style prompt
 --- @see NeoVimDocs [`:h substitute`](https://neovim.io/doc/user/change.html#%3Asubstitute)
 --- @see NeoVimDocs [`:h substitute()`](https://neovim.io/doc/user/vimfn.html#substitute())
@@ -90,17 +106,24 @@ end
 --- @return ReplaceSpec
 local function parse_prompt_regex(prompt)
     if not prompt or prompt == "" then
-        return { is_replace = false, search = "", replace = "", flags = "" }
+        return { is_replace = false, range = "", search = "", replace = "", flags = "", count = "" }
     end
 
-    local sr_prefix = ":s"
+    -- ":s", ":1,3s", ":%s", ":'<,'>s"
+    --- @type string|nil
+    local range = prompt:match("^:(.-)s")
+    if not range then
+        return { is_replace = false, range = "", search = prompt, replace = "", flags = "", count = "" }
+    end
+
+    local sr_prefix = ":" .. range .. "s"
     if not vim.startswith(prompt, sr_prefix) then
-        return { is_replace = false, search = prompt, replace = "", flags = "" }
+        return { is_replace = false, range = "", search = prompt, replace = "", flags = "", count = "" }
     end
 
     local sep = prompt:sub(#sr_prefix + 1, #sr_prefix + 1)
     if not sep or sep == "" then
-        return { is_replace = false, search = prompt, replace = "", flags = "" }
+        return { is_replace = false, range = "", search = prompt, replace = "", flags = "", count = "" }
     end
 
     --- @param start_index integer
@@ -109,7 +132,10 @@ local function parse_prompt_regex(prompt)
         local idx = start_index
         while idx <= #prompt do
             local ch = prompt:sub(idx, idx)
-            if ch == sep then return idx end
+            local prev = prompt:sub(idx - 1, idx - 1)
+            if ch == sep and prev ~= "\\" then
+                return idx
+            end
             idx = idx + 1
         end
         return nil
@@ -120,31 +146,110 @@ local function parse_prompt_regex(prompt)
     local search_start = #sr_prefix + 2
     local search_end = next_separator(search_start)
     if not search_end then
-        return { is_replace = false, search = prompt, replace = "", flags = "" }
+        return { is_replace = false, range = "", search = prompt, replace = "", flags = "", count = "" }
     end
 
     -- ? Skip the separator
     local replace_start = search_end + 1
     local replace_end = next_separator(replace_start)
     if not replace_end then
-        return { is_replace = false, search = prompt, replace = "", flags = "" }
+        return { is_replace = false, range = range, search = prompt, replace = "", flags = "", count = "" }
     end
 
     -- ? Skip the separators
     local search = prompt:sub(search_start, search_end - 1)
     local replace = prompt:sub(replace_start, replace_end - 1)
-    local flags = prompt:sub(replace_end + 1)
-    return { is_replace = true, search = search, replace = replace, flags = flags or "" }
+
+    --- @type string, string
+    local flags, count = vim.trim(
+        prompt:sub(replace_end + 1)
+    ):match("^([a-zA-Z]*)%s*(%d*)$")
+
+    return {
+        is_replace = true,
+        range = range,
+        search = search,
+        replace = replace,
+        flags = flags or "",
+        count = count or ""
+    }
 end
 
---- Sets up a buffer with TS highlighting
---- @param bufnr integer
---- @param filetype string
+--- Return a line transformer based on `ReplaceSpec`.
+--- @param spec ReplaceSpec
+--- @return fun(line: string): string
+local function transform_line(spec)
+    if not spec.is_replace then
+        return function(line) return line end
+    end
+    return function(line)
+        local ok, result = pcall(vim.fn.substitute, line, spec.search, spec.replace, spec.flags)
+        if not ok then
+            vim.notify(("Invalid substitute pattern: %s"):format(result), vim.log.levels.WARN)
+            return line
+        end
+        return result
+    end
+end
+
+--- Parse a range specifier like "%", "3", or "2,5" into start/end line numbers.
+--- @see LuaDocs [Patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1)
+--- @see LuaDocs [`string.match`](https://www.lua.org/manual/5.4/manual.html#pdf-string.match)
+--- @param range string
+--- @param max_lines integer
+--- @return integer
+--- @return integer
+local function parse_range(range, max_lines)
+    -- ! Matching an optional capture group is not possible in lua
+    -- ! `(x)?` will always fail so we need to parse the two cases separately
+
+    --- @type string|nil, string|nil
+    local min, max = range:match("^(%d+),(%d+)$")
+    local min_range = tonumber(min)
+    local max_range = tonumber(max)
+    if min_range and max_range then return min_range, max_range end
+
+    --- @type string|nil
+    local single = range:match("^(%d+)$")
+    local single_range = tonumber(single)
+    if single_range then return single_range, single_range end
+
+    return 1, max_lines
+end
+
+--- Apply substitution to lines
+--- Returns new lines and a list of changed line indexes.
 --- @param lines string[]
-local function setup_buffer(bufnr, filetype, lines)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
-    preview_utils.ts_highlighter(bufnr, filetype)
+--- @param spec ReplaceSpec
+--- @return string[] new_lines
+--- @return integer[] changed_lines
+local function apply_spec_to_lines(lines, spec)
+    local transform = transform_line(spec)
+    local new_lines, changed_lines = {}, {}
+
+    local start_line, end_line = parse_range(spec.range, #lines)
+
+    for i, line in ipairs(lines) do
+        if i >= start_line and i <= end_line then
+            if spec.is_replace then
+                local new_line = transform(line)
+                new_lines[i] = new_line
+                if new_line ~= line then
+                    table.insert(changed_lines, i)
+                end
+            else
+                local ok, pattern = pcall(vim.regex, spec.search)
+                if ok and pattern:match_str(line) then
+                    table.insert(changed_lines, i)
+                end
+                new_lines[i] = line
+            end
+        else
+            new_lines[i] = line
+        end
+    end
+
+    return new_lines, changed_lines
 end
 
 -----------------------------------------------------------
@@ -170,18 +275,6 @@ local function build_hunks(total_lines, matches)
     return hunks
 end
 
---- Return a line transformer based on `ReplaceSpec`.
---- @param spec ReplaceSpec
---- @return fun(line: string): string
-local function transform_line(spec)
-    if not spec.is_replace then
-        return function(line) return line end
-    end
-    return function(line)
-        return vim.fn.substitute(line, spec.search, spec.replace, spec.flags)
-    end
-end
-
 --- Compute hunks between original and transformed lines.
 --- If `spec.is_replace` is false, only marks matches of `spec.search`.
 --- @param lines string[]
@@ -189,25 +282,8 @@ end
 --- @return string[]
 --- @return Hunk[]
 local function collect_hunks(lines, spec)
-    local transform = transform_line(spec)
-    local matches = {}
-    local replacements = {}
-
-    for i, line in ipairs(lines) do
-        local new = transform(line)
-        matches[i] = new
-
-        if spec.is_replace then
-            if line ~= new then table.insert(replacements, i) end
-        else
-            local ok, pattern = pcall(vim.regex, spec.search)
-            if ok and pattern:match_str(line) then
-                table.insert(replacements, i)
-            end
-        end
-    end
-
-    return matches, build_hunks(#lines, replacements)
+    local new_lines, changed = apply_spec_to_lines(lines, spec)
+    return new_lines, build_hunks(#lines, changed)
 end
 
 -----------------------------------------------------------
@@ -411,16 +487,9 @@ local function apply_replacement_to_file(entry)
 
     local lines = read_file_lines(path)
     if not lines then return false, "failed to read" end
+    local new_lines, changed = apply_spec_to_lines(lines, spec)
 
-    local transform = transform_line(spec)
-    local new_lines, changed = {}, false
-    for _, line in ipairs(lines) do
-        local new = transform(line)
-        if new ~= line then changed = true end
-        table.insert(new_lines, new)
-    end
-
-    if not changed then return false, "no changes" end
+    if vim.tbl_isempty(changed) then return false, "no changes" end
     return write_file_lines(path, new_lines), nil
 end
 
