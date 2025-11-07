@@ -83,7 +83,9 @@ local function write_file_lines(path, lines)
     return result == 0
 end
 
---- Parse a substitute-style prompt (e.g. `:s/foo/bar/g`).
+--- Parse a substitute-style prompt
+--- @see NeoVimDocs [`:h substitute`](https://neovim.io/doc/user/change.html#%3Asubstitute)
+--- @see NeoVimDocs [`:h substitute()`](https://neovim.io/doc/user/vimfn.html#substitute())
 --- @param prompt string|nil
 --- @return ReplaceSpec
 local function parse_prompt_regex(prompt)
