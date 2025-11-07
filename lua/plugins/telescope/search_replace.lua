@@ -291,18 +291,22 @@ local function render_diff_preview(bufnr, orig_lines, new_lines, hunks, spec, fi
         local end_col = #m_data.text + 1
         if m_data.kind == "add" then
             local ok, pattern = pcall(vim.regex, spec.replace)
-            vim.api.nvim_buf_set_extmark(bufnr, ns, buf_row, 0, { hl_group = "DiffAdd", end_col = end_col, })
-            if ok then highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "Added") end
+            if ok then
+                highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "Added")
+                vim.api.nvim_buf_set_extmark(bufnr, ns, buf_row, 0, { hl_group = "DiffAdd", end_col = end_col, })
+            end
         elseif m_data.kind == "del" then
             local ok, pattern = pcall(vim.regex, spec.search)
-            vim.api.nvim_buf_set_extmark(bufnr, ns, buf_row, 0, { hl_group = "DiffDelete", end_col = end_col, })
-            if ok then highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "Removed") end
+            if ok then
+                vim.api.nvim_buf_set_extmark(bufnr, ns, buf_row, 0, { hl_group = "DiffDelete", end_col = end_col, })
+                highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "Removed")
+            end
         elseif not spec.is_replace then
             local ok, pattern = pcall(vim.regex, spec.search)
-            if pattern:match_str(m_data.text) ~= nil then
+            if ok and pattern:match_str(m_data.text) ~= nil then
                 vim.api.nvim_buf_set_extmark(bufnr, ns, buf_row, 0, { hl_group = "Search", end_col = end_col, })
+                highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "TelescopeMatching")
             end
-            if ok then highlight_matches(bufnr, m_data.text, buf_row, pattern, 1, "TelescopeMatching") end
         end
     end
 end
