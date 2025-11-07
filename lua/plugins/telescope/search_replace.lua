@@ -235,16 +235,6 @@ end
 -- Diff rendering
 -----------------------------------------------------------
 
---- Returns a hunk header based on a Hunk
---- @param hunk Hunk
-local function hunk_header(hunk)
-    return string.format(
-        "@@ -%d,%d +%d,%d @@",
-        hunk.start, hunk.finish - hunk.start + 1,
-        hunk.start, hunk.finish - hunk.start + 1
-    )
-end
-
 --- Render a diff or search preview.
 --- @param bufnr integer
 --- @param orig_lines string[]
@@ -265,7 +255,24 @@ local function render_diff_preview(bufnr, orig_lines, new_lines, hunks, spec, fi
     end
 
     for _, hunk in ipairs(hunks) do
-        table.insert(out, hunk_header(hunk))
+        local orig_count, new_count = 0, 0
+
+        for lnum = hunk.start, hunk.finish do
+            local old, new = orig_lines[lnum] or "", new_lines[lnum] or ""
+            if spec.is_replace and old ~= new then
+                if old ~= "" then orig_count = orig_count + 1 end
+                if new ~= "" then new_count = new_count + 1 end
+            else
+                orig_count = orig_count + 1
+                new_count = new_count + 1
+            end
+        end
+
+        table.insert(out, string.format("@@ -%d,%d +%d,%d @@",
+            hunk.start, orig_count,
+            hunk.start, new_count
+        ))
+
         for lnum = hunk.start, hunk.finish do
             local old, new = orig_lines[lnum] or "", new_lines[lnum] or ""
             if spec.is_replace and old ~= new then
