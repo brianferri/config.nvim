@@ -11,46 +11,46 @@ local map = function(mode, lhs, rhs, desc, opts)
 end
 
 vim.o.keymodel = "startsel,stopsel"
-local all_modes = { 'v', 'i', 'n' }
+local all = { 'v', 'i', 'n' }
 
 -- Core Telescope and File Navigation
-map(all_modes, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
-map(all_modes, '<C-g>', "<CMD>FloatermNew --title=LazyGit --height=0.9 --width=0.8 lazygit<CR>", "Open LazyGit")
-map(all_modes, '<C-,>', "<CMD>FloatermNew --title=NvimConfig --height=0.9 --width=0.8 nvim ~/.config/nvim<CR>", "Open Nvim Config")
-map(all_modes, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
-map(all_modes, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
-map(all_modes, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
-map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
+map(all, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
+map(all, '<C-g>', "<CMD>FloatermNew --title=Git --height=0.9 --width=0.8 lazygit<CR>", "Open LazyGit")
+map(all, '<C-,>', "<CMD>FloatermNew --title=Config --height=0.9 --width=0.8 nvim ~/.config/nvim<CR>", "Open Nvim Config")
+map(all, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
+map(all, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
+map(all, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
+map(all, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
 -- Visual Multi
 vim.g.VM_default_mappings = 0
-map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
-map(all_modes, '<C-S-Up>', '<ESC><Plug>(VM-Select-Cursor-Up)', "VM: Start Selecting Up")
-map(all_modes, '<C-S-Down>', '<ESC><Plug>(VM-Select-Cursor-Down)', "VM: Start Selecting Down")
+map(all, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
+map(all, '<C-S-Up>', '<ESC><Plug>(VM-Select-Cursor-Up)', "VM: Start Selecting Up")
+map(all, '<C-S-Down>', '<ESC><Plug>(VM-Select-Cursor-Down)', "VM: Start Selecting Down")
 map({ 'i', 'n' }, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
 map('v', '<M-d>', '<Plug>(VM-Find-Subword-Under)', "VM: Select Next Word Down")
 
 -- Split Panes
 vim.o.spr = true
 vim.o.sb = true
-map(all_modes, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
-map(all_modes, '<M-->', '<CMD>split<CR>', "Horizontal Split")
-map(all_modes, '<M-S-\\>', "<CMD>vsplit <BAR> terminal<CR>i", "Terminal in Vertical Split")
-map(all_modes, '<M-S-->', "<CMD>split <BAR> terminal<CR>i", "Terminal in Horizontal Split")
-map(all_modes, '<C-Left>', "<ESC><C-w>h", "Move Between Splits Left")
-map(all_modes, '<C-Down>', "<ESC><C-w>j", "Move Between Splits Down")
-map(all_modes, '<C-Up>', "<ESC><C-w>k", "Move Between Splits Up")
-map(all_modes, '<C-Right>', "<ESC><C-w>l", "Move Between Splits Right")
+map(all, '<M-\\>', '<CMD>vsplit<CR>', "Vertical Split")
+map(all, '<M-->', '<CMD>split<CR>', "Horizontal Split")
+map(all, '<M-S-\\>', "<CMD>vsplit <BAR> terminal<CR>i", "Terminal in Vertical Split")
+map(all, '<M-S-->', "<CMD>split <BAR> terminal<CR>i", "Terminal in Horizontal Split")
+map(all, '<C-Left>', "<ESC><C-w>h", "Move Between Splits Left")
+map(all, '<C-Down>', "<ESC><C-w>j", "Move Between Splits Down")
+map(all, '<C-Up>', "<ESC><C-w>k", "Move Between Splits Up")
+map(all, '<C-Right>', "<ESC><C-w>l", "Move Between Splits Right")
 
 -- Quit, Write, Search
-map(all_modes, '<M-q>', "<CMD>qa<CR>", "Quit All")
-map(all_modes, '<M-S-w>', "<CMD>q<CR>", "Close Window")
-map(all_modes, '<M-w>', "<CMD>bp <BAR> bd #<CR>", "Close Tab")
-map(all_modes, '<M-s>', "<CMD>w<CR>", "Write File")
-map(all_modes, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
+map(all, '<M-q>', "<CMD>qa<CR>", "Quit All")
+map(all, '<M-S-w>', "<CMD>q<CR>", "Close Window")
+map(all, '<M-w>', "<CMD>bp <BAR> bd #<CR>", "Close Tab")
+map(all, '<M-s>', "<CMD>w<CR>", "Write File")
+map(all, '<M-S-f>', "<CMD>Telescope live_grep<CR>", "Search All Files")
 
 -- Select All, Move Lines, Selection Manipulation
-map(all_modes, '<M-a>', "<ESC>ggVG", "Select All")
+map(all, '<M-a>', "<ESC>ggVG", "Select All")
 
 map({ 'i', 'n' }, '<M-C-S-Up>', '<ESC>yyP', "Duplicate Line Up")
 map({ 'i', 'n' }, '<M-C-S-Down>', '<ESC>yyp', "Duplicate Line Down")
@@ -91,21 +91,21 @@ map('v', '<M-/>', comment(), "Toggle Comment", { expr = true })
 map({ 'i', 'n' }, '<M-v>', '<ESC>"+pa', "Paste")
 map('v', '<M-v>', '"+pa', "Paste")
 
-map(all_modes, '<M-z>', '<ESC>ui', "Undo")
-map(all_modes, '<M-S-z>', '<ESC><C-r>i', "Redo")
+map(all, '<M-z>', '<ESC>ui', "Undo")
+map(all, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
 map({ 'i', 'n' }, '<M-x>', '<ESC>dd<ESC>i', "Cut")
 map('v', '<M-x>', '"+d<ESC>i', "Cut")
 map('v', '<M-c>', '"+y<ESC>i', "Copy")
 
 -- LSP Bindings
-map(all_modes, '<F2>', vim.lsp.buf.rename, "LSP Rename")
-map(all_modes, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
-map(all_modes, '<M-C-k>', vim.lsp.buf.references, "LSP References")
+map(all, '<F2>', vim.lsp.buf.rename, "LSP Rename")
+map(all, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
+map(all, '<M-C-k>', vim.lsp.buf.references, "LSP References")
 
-map(all_modes, '<M-S-i>', function() vim.lsp.buf.format({ async = true }) end, "LSP Format")
-map(all_modes, '<M-k>', function() vim.lsp.buf.hover({ border = 'rounded' }) end, "LSP Hover")
-map(all_modes, '<C-k>', function() vim.lsp.buf.implementation({ reuse_win = true }) end, "LSP Implementation")
+map(all, '<M-S-i>', function() vim.lsp.buf.format({ async = true }) end, "LSP Format")
+map(all, '<M-k>', function() vim.lsp.buf.hover({ border = 'rounded' }) end, "LSP Hover")
+map(all, '<C-k>', function() vim.lsp.buf.implementation({ reuse_win = true }) end, "LSP Implementation")
 
 -- Diagnostics
-map(all_modes, '<M-e>', vim.diagnostic.open_float, "Open Diagnostics")
+map(all, '<M-e>', vim.diagnostic.open_float, "Open Diagnostics")
