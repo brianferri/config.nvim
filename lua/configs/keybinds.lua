@@ -11,7 +11,7 @@ local map = function(mode, lhs, rhs, desc, opts)
 end
 
 vim.o.keymodel = "startsel,stopsel"
-local all_modes = { 'i', 'n', 'v' }
+local all_modes = { 'v', 'i', 'n' }
 
 -- Core Telescope and File Navigation
 map(all_modes, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
@@ -24,11 +24,11 @@ map(all_modes, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer
 
 -- Visual Multi
 vim.g.VM_default_mappings = 0
-map({ 'i', 'n' }, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
-map('v', '<M-d>', '<Plug>(VM-Find-Subword-Under)', "VM: Select Next Word Down")
 map(all_modes, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
 map(all_modes, '<C-S-Up>', '<ESC><Plug>(VM-Select-Cursor-Up)', "VM: Start Selecting Up")
 map(all_modes, '<C-S-Down>', '<ESC><Plug>(VM-Select-Cursor-Down)', "VM: Start Selecting Down")
+map({ 'i', 'n' }, '<M-d>', '<ESC><Plug>(VM-Find-Under)', "VM: Select Next Word Down")
+map('v', '<M-d>', '<Plug>(VM-Find-Subword-Under)', "VM: Select Next Word Down")
 
 -- Split Panes
 vim.o.spr = true
@@ -67,13 +67,13 @@ map({ 'i', 'n' }, '<M-Left>', "<ESC>bi", "Move To Previous Word")
 map('v', '<M-S-Right>', "e", "Shift Selection Right By A Word")
 map('v', '<M-S-Left>', "b", "Shift Selection Left By A Word")
 
-map({ 'n', 'v' }, '<M-BS>', 'hvbd', "Delete Word Before Cursor")
-map({ 'n', 'v' }, '<M-Del>', 'ved', "Delete Word After Cursor")
+map({ 'v', 'n' }, '<M-BS>', 'hvbd', "Delete Word Before Cursor")
+map({ 'v', 'n' }, '<M-Del>', 'ved', "Delete Word After Cursor")
 map('i', '<M-BS>', '<C-w>', "Delete Word Before Cursor")
 map('i', '<M-Del>', '<Right><ESC>dei', "Delete Word After Cursor")
 
-map('v', '<Tab>', ">gv", "Indent Selection")
-map('v', '<S-Tab>', "<gv", "Unindent Selection")
+map({ 'v', 'n' }, '<Tab>', ">gv", "Indent Selection")
+map({ 'v', 'n' }, '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 map('v', '<DEL>', '"_d', "Delete Selection")
 
