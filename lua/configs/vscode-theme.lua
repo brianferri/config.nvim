@@ -9,6 +9,8 @@ require('vscode').setup({
 
 vim.cmd.colorscheme "vscode"
 
+vim.api.nvim_set_hl(0, "Cursor", { bg = "#FFFFFF", fg = "#000000" })
+
 -----------------------------------------------------------
 -- Trailing Whitespaces
 -----------------------------------------------------------

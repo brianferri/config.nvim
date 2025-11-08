@@ -77,13 +77,11 @@ map('v', '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 map('v', '<DEL>', '"_d', "Delete Selection")
 
-map('v', '<', "<Plug>(nvim-surround-visual)>", "Surround Selection With `<>`")
-map('v', '(', "<Plug>(nvim-surround-visual))", "Surround Selection With `()`")
-map('v', '[', "<Plug>(nvim-surround-visual)]", "Surround Selection With `[]`")
-map('v', '{', "<Plug>(nvim-surround-visual)}", "Surround Selection With `{}`")
-map('v', "'", "<Plug>(nvim-surround-visual)'", "Surround Selection With `''`")
-map('v', '"', '<Plug>(nvim-surround-visual)"', 'Surround Selection With `""`')
-map('v', '`', '<Plug>(nvim-surround-visual)`', 'Surround Selection With ``')
+local surround_keys = { "()", "[]", "{}", "''", '""', "``" }
+for _, key in ipairs(surround_keys) do
+    local open, close = key:sub(1, 1), key:sub(2, 2)
+    map('v', open, "<Plug>(nvim-surround-visual)" .. close, "Surround Selection With `" .. key .. "`")
+end
 
 local comment = function() return require('vim._comment').operator() .. '_' end
 map({ 'i', 'n' }, '<M-/>', '<ESC>' .. comment(), "Toggle Comment", { expr = true })
