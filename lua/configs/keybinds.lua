@@ -77,7 +77,7 @@ map({ 'v', 'n' }, '<S-Tab>', "<gv", "Unindent Selection")
 map('v', '<BS>', '"_d', "Delete Selection")
 map('v', '<DEL>', '"_d', "Delete Selection")
 
-local surround_keys = { "()", "[]", "{}", "''", '""', "``" }
+local surround_keys = { "()", "[]", "{}", "''", '""', "``", "<>" }
 for _, key in ipairs(surround_keys) do
     local open, close = key:sub(1, 1), key:sub(2, 2)
     map('v', open, "<Plug>(nvim-surround-visual)" .. close, "Surround Selection With `" .. key .. "`")
