@@ -101,7 +101,7 @@ map('v', '<M-c>', '"+y<ESC>i', "Copy")
 -- LSP Bindings
 map(all, '<F2>', vim.lsp.buf.rename, "LSP Rename")
 map(all, '<M-.>', vim.lsp.buf.code_action, "LSP Code Action")
-map(all, '<M-C-k>', vim.lsp.buf.references, "LSP References")
+map(all, '<M-u>', vim.lsp.buf.references, "LSP References")
 
 map(all, '<M-S-i>', function() vim.lsp.buf.format({ async = true }) end, "LSP Format")
 map(all, '<M-k>', function() vim.lsp.buf.hover({ border = 'rounded' }) end, "LSP Hover")
