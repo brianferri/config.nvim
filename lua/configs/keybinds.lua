@@ -109,3 +109,4 @@ map(all, '<C-k>', function() vim.lsp.buf.implementation({ reuse_win = true }) en
 
 -- Diagnostics
 map(all, '<M-e>', vim.diagnostic.open_float, "Open Diagnostics")
+map(all, '<M-S-e>', vim.diagnostic.setqflist, "Open All Diagnostics")
