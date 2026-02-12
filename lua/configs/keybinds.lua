@@ -22,6 +22,10 @@ map(all, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command
 map(all, '<M-S-]>', "<CMD>BufferLineCycleNext<CR>", "Cycle Next Buffer")
 map(all, '<M-S-[>', "<CMD>BufferLineCyclePrev<CR>", "Cycle Previous Buffer")
 
+-- Gitsigns
+map(all, '<M-S-b>', '<CMD>Gitsigns blame<CR>', "Toggle Buffer Blame")
+map(all, '<M-b>', '<CMD>Gitsigns blame_line<CR>', "Show Line Blame")
+
 -- Visual Multi
 vim.g.VM_default_mappings = 0
 map(all, '<M-S-d>', '<ESC><Plug>(VM-Select-All)', "VM: Select All Occurrences")
