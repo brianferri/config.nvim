@@ -12,8 +12,8 @@ Its goal is to be clean, maintainable, and easily extendable.
 * Neovim 0.11+
 * Language servers, debuggers, etc., installed separately (this config assumes they exist or will be installed via `mason.nvim`)
   * You will need `tree-sitter-cli`;
-  - [OPTIONAL] `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` for the default [lsp configs](./lua/configs/lspconfig.lua);
-    - > remove any lsps you don't intend to use/don't want to install the binaries for before running `nvim`
+  - `nodejs`, `npm`, `rust`, `cargo`, `go`, `zig`, `gcc/g++` for the default [lsp configs](./lua/configs/lspconfig.lua);
+> remove any lsps from the [lsp configs](./lua/configs/lspconfig.lua) you don't intend to use/don't want to install the binaries for before running `nvim`
 
 ## Installation
 
