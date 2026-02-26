@@ -6,14 +6,16 @@ local function close_buf(bufnr)
     vim.cmd("bd " .. bufnr)
 end
 
+--- @param diagnostics table<string, any>
+--- @return string
 local function diagnostics_indicator(_, _, diagnostics, _)
     local indicators = " "
     for level, count in pairs(diagnostics) do
         local symbol =
-            (level == "error" and "") or
-            (level == "warning" and "") or
-            (level == "info" and "") or
-            ""
+            (level == "error" and "󰅚") or
+            (level == "warning" and "󰀪") or
+            (level == "info" and "󰋽") or
+            "󰌶"
         indicators = indicators .. count .. symbol .. " "
     end
     return indicators
