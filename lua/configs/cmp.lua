@@ -10,7 +10,7 @@ cmp.setup({
         },
         documentation = {
             border = 'rounded',
-            scrollbar = '║',
+            scrollbar = true,
         },
     },
     snippet = {
