@@ -49,6 +49,7 @@ require("bufferline").setup({
     highlights = {
         fill = { bg = "#1e1e1e" },
         background = { fg = "#808080", },
+        trunc_marker = { fg = "#808080" },
         buffer_visible = { fg = "#a0a0a0", },
         buffer_selected = {
             fg = "#ffffff",
@@ -84,22 +85,35 @@ require("bufferline").setup({
         diagnostic_selected = { bold = true, underline = true },
 
         error = { fg = "#e1554f" },
+        error_visible = { fg = "#e1554f" },
         error_selected = { fg = "#e1554f", bold = true, underline = true },
+        error_diagnostic = { fg = "#e1554f" },
+        error_diagnostic_visible = { fg = "#e1554f" },
         error_diagnostic_selected = { fg = "#e1554f", bold = true, underline = true },
 
         warning = { fg = "#dcdcaf" },
+        warning_visible = { fg = "#dcdcaf" },
         warning_selected = { fg = "#dcdcaf", bold = true, underline = true },
+        warning_diagnostic = { fg = "#dcdcaf" },
+        warning_diagnostic_visible = { fg = "#dcdcaf" },
         warning_diagnostic_selected = { fg = "#dcdcaf", bold = true, underline = true },
 
-        info = { fg = "#3678c4" },
-        info_selected = { fg = "#3678c4", bold = true, underline = true },
-        info_diagnostic_selected = { fg = "#3678c4", bold = true, underline = true },
+        info = { fg = "#74985d" },
+        info_visible = { fg = "#74985d" },
+        info_selected = { fg = "#74985d", bold = true, underline = true },
+        info_diagnostic = { fg = "#74985d" },
+        info_diagnostic_visible = { fg = "#74985d" },
+        info_diagnostic_selected = { fg = "#74985d", bold = true, underline = true },
 
-        hint = { fg = "#74985d" },
-        hint_selected = { fg = "#74985d", bold = true, underline = true },
-        hint_diagnostic_selected = { fg = "#74985d", bold = true, underline = true },
+        hint = { fg = "#3678c4" },
+        hint_visible = { fg = "#3678c4" },
+        hint_selected = { fg = "#3678c4", bold = true, underline = true },
+        hint_diagnostic = { fg = "#3678c4" },
+        hint_diagnostic_visible = { fg = "#3678c4" },
+        hint_diagnostic_selected = { fg = "#3678c4", bold = true, underline = true },
 
         duplicate = { fg = "#808080" },
+        duplicate_visible = { fg = "#808080" },
         duplicate_selected = { fg = "#a0a0a0", bold = true, underline = true },
     }
 })
