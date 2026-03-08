@@ -1,6 +1,7 @@
 require("lazydev").setup({
     library = {
         "nvim-dap-ui",
-        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+        { path = "${3rd}/luajit2/library", words = { "jit" } },
+        { path = "${3rd}/luv/library",     words = { "vim%.uv" } },
     },
 })
