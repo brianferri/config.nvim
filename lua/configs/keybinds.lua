@@ -16,6 +16,7 @@ local all = { 'v', 'i', 'n' }
 -- Core Telescope and File Navigation
 map(all, '<C-b>', "<CMD>NvimTreeToggle<CR>", "Toggle File Tree")
 map(all, '<C-g>', "<CMD>FloatermNew --title=Git --height=0.9 --width=0.8 lazygit<CR>", "Open LazyGit")
+map(all, '<C-d>', "<CMD>FloatermNew --title=Docker --height=0.9 --width=0.8 lazydocker<CR>", "Open LazyDocker")
 map(all, '<C-,>', "<CMD>FloatermNew --title=Config --height=0.9 --width=0.8 nvim ~/.config/nvim<CR>", "Open Nvim Config")
 map(all, '<M-p>', "<CMD>Telescope find_files<CR>", "Telescope: Find Files (file palette)")
 map(all, '<M-S-p>', "<CMD>Telescope commands<CR>", "Telescope: Commands (command palette)")
