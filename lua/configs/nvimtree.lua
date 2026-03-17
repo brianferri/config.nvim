@@ -18,6 +18,7 @@ require("nvim-tree").setup({
         enable = true,
     },
     view = {
+        centralize_selection = true,
         number = true,
         width = {
             max = 30,
