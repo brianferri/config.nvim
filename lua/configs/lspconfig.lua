@@ -28,3 +28,4 @@ require("mason-lspconfig").setup({
 
 -- Some lsps may require certain configurations or overrides
 require("configs.lsps.vue")
+require("configs.lsps.graphql")
