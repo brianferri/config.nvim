@@ -13,11 +13,7 @@ cmp.setup({
             scrollbar = true,
         },
     },
-    snippet = {
-        expand = function(args)
-            luasnip.lsp_expand(args.body)
-        end,
-    },
+    snippet = { expand = function(args) luasnip.lsp_expand(args.body) end },
     mapping = cmp.mapping.preset.insert({
         ["<Tab>"] = cmp.mapping.confirm {
             behavior = cmp.ConfirmBehavior.Insert,
@@ -25,6 +21,7 @@ cmp.setup({
         },
     }),
     sources = cmp.config.sources({
+        { name = "uGraphQL" },
         { name = "nvim_lua" },
         { name = "nvim_lsp" },
         { name = "luasnip" },
