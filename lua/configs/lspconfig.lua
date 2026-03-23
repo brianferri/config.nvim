@@ -18,7 +18,6 @@ require("mason-lspconfig").setup({
         "gopls",
         "pyright",
         "intelephense",
-        "phpactor",
         "tailwindcss",
         "bashls",
         "emmet_language_server",
