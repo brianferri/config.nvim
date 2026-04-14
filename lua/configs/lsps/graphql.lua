@@ -31,6 +31,4 @@ vim.lsp.config('graphql', {
 })
 vim.lsp.enable({ 'graphql' })
 
--- require("plugins.lspconfig.graphql").setup({
---     graphql_lsp_path = graphql_lsp_path,
--- })
+require("plugins.lspconfig.graphql").setup()

@@ -8,7 +8,6 @@ local M = {}
 ---@field debounce_ms? integer
 ---@field string_node_map? table<string, string>
 ---@field namespace? string
----@field graphql_lsp_path? string
 
 ---@class GqlState
 ---@field timers table<integer, uv.uv_timer_t>
@@ -84,8 +83,106 @@ local function read_injection_queries(lang)
 end
 
 --------------------------------------------------------------------------------
+-- Diagnostics Bridge
+--------------------------------------------------------------------------------
+
+---@param client vim.lsp.Client
+local function attach_lsp_bridge(client)
+    local base =
+        client.handlers["textDocument/publishDiagnostics"]
+        or vim.lsp.handlers["textDocument/publishDiagnostics"]
+
+    client.handlers["textDocument/publishDiagnostics"] =
+    ---@param err lsp.ResponseError
+    ---@param result any
+    ---@param ctx lsp.HandlerContext
+    ---@param cfg table
+        function(err, result, ctx, cfg)
+            if not result or not result.uri then return end
+            if result.uri:match("%.graphql$") then
+                local host = result.uri:gsub("%.graphql$", "")
+                local bufnr = vim.uri_to_bufnr(host)
+
+                if vim.api.nvim_buf_is_valid(bufnr) then
+                    ---@type vim.Diagnostic[]
+                    local diagnostics = {}
+
+                    for _, d in ipairs(result.diagnostics or {}) do
+                        diagnostics[#diagnostics + 1] = {
+                            bufnr = bufnr,
+                            lnum = d.range.start.line,
+                            col = d.range.start.character,
+                            end_lnum = d.range["end"].line,
+                            end_col = d.range["end"].character,
+                            severity = d.severity,
+                            message = d.message,
+                            source = d.source or "graphql-lsp",
+                        }
+                    end
+
+                    if state.ns then vim.diagnostic.set(state.ns, bufnr, diagnostics) end
+                    return
+                end
+            end
+
+            return base(err, result, ctx, cfg)
+        end
+end
+
+--------------------------------------------------------------------------------
 -- LSP Sync
 --------------------------------------------------------------------------------
+
+---@param bufnr integer
+---@param graphql_cfg vim.lsp.Config
+---@return string
+local function graphql_root(bufnr, graphql_cfg)
+    local cwd = vim.uv.cwd() or vim.fn.getcwd()
+    local name = vim.api.nvim_buf_get_name(bufnr)
+    if name == "" then return cwd end
+
+    local markers = graphql_cfg.root_markers
+    local root = type(markers) == "table" and vim.fs.root(name, markers) or nil
+    if root then return root end
+
+    local dir = vim.fs.dirname(name)
+    return dir ~= "" and dir or cwd
+end
+
+---@param bufnr integer
+---@return vim.lsp.Client|nil
+local function ensure_graphql_client(bufnr)
+    local graphql_cfg = vim.lsp.config.graphql
+    if not graphql_cfg then
+        vim.notify(
+            "GraphQL LSP config is missing; cannot start GraphQL language server.",
+            vim.log.levels.WARN,
+            { title = config.namespace }
+        )
+        return nil
+    end
+
+    local root_dir = graphql_root(bufnr, graphql_cfg)
+
+    for _, client in ipairs(vim.lsp.get_clients({ name = "graphql" })) do
+        if client.config.root_dir == root_dir then return client end
+    end
+
+    local start_cfg = vim.deepcopy(graphql_cfg)
+    start_cfg.root_dir = root_dir
+
+    local client_id = vim.lsp.start(start_cfg, {
+        bufnr = bufnr,
+        reuse_client = function(client, cfg)
+            return client.name == "graphql" and client.config.root_dir == cfg.root_dir
+        end,
+    })
+
+    if not client_id then return nil end
+    local client = vim.lsp.get_client_by_id(client_id)
+    if client then attach_lsp_bridge(client) end
+    return client
+end
 
 ---@param bufnr integer
 ---@return string
@@ -126,7 +223,7 @@ end
 ---@param bufnr integer
 ---@param fragments { start_row: integer, text: string }[]
 local function sync_lsp(bufnr, fragments)
-    local client = vim.lsp.get_clients({ name = "graphql" })[1]
+    local client = ensure_graphql_client(bufnr)
     if not client then return end
 
     local line_count = vim.api.nvim_buf_line_count(bufnr)
@@ -262,53 +359,6 @@ local function register_cmp()
     end
 
     cmp.register_source(config.namespace, source)
-end
-
---------------------------------------------------------------------------------
--- Diagnostics Bridge
---------------------------------------------------------------------------------
-
----@param client vim.lsp.Client
-local function attach_lsp_bridge(client)
-    local base =
-        client.handlers["textDocument/publishDiagnostics"]
-        or vim.lsp.handlers["textDocument/publishDiagnostics"]
-
-    client.handlers["textDocument/publishDiagnostics"] =
-    ---@param err lsp.ResponseError
-    ---@param result any
-    ---@param ctx lsp.HandlerContext
-    ---@param cfg table
-        function(err, result, ctx, cfg)
-            if not result or not result.uri then return end
-            if result.uri:match("%.graphql$") then
-                local host = result.uri:gsub("%.graphql$", "")
-                local bufnr = vim.uri_to_bufnr(host)
-
-                if vim.api.nvim_buf_is_valid(bufnr) then
-                    ---@type vim.Diagnostic[]
-                    local diagnostics = {}
-
-                    for _, d in ipairs(result.diagnostics or {}) do
-                        diagnostics[#diagnostics + 1] = {
-                            bufnr = bufnr,
-                            lnum = d.range.start.line,
-                            col = d.range.start.character,
-                            end_lnum = d.range["end"].line,
-                            end_col = d.range["end"].character,
-                            severity = d.severity,
-                            message = d.message,
-                            source = d.source or "graphql-lsp",
-                        }
-                    end
-
-                    if state.ns then vim.diagnostic.set(state.ns, bufnr, diagnostics) end
-                    return
-                end
-            end
-
-            return base(err, result, ctx, cfg)
-        end
 end
 
 --------------------------------------------------------------------------------
