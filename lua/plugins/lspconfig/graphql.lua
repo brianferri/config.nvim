@@ -5,9 +5,10 @@ local M = {}
 ---@field version integer
 
 ---@class GqlConfig
----@field debounce_ms integer
----@field string_node_map table<string, string>
----@field namespace string
+---@field debounce_ms? integer
+---@field string_node_map? table<string, string>
+---@field namespace? string
+---@field graphql_lsp_path? string
 
 ---@class GqlState
 ---@field timers table<integer, uv.uv_timer_t>
