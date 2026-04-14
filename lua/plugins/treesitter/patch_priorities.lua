@@ -54,7 +54,15 @@ function M.override(priorities)
         local highlighter = treesitter_new(tree, opts)
 
         local ok, query = pcall(highlighter.get_query, highlighter, tree:lang())
-        if ok then patch_query(getmetatable(query:query())) end
+        if ok and query and type(query.query) == "function" then
+            local query_ok, query_obj = pcall(query.query, query)
+            if query_ok and query_obj then
+                local query_mt = getmetatable(query_obj)
+                if query_mt and type(query_mt.iter_captures) == "function" then
+                    patch_query(query_mt)
+                end
+            end
+        end
 
         -- ! Restore original constructor after patching
         vim.treesitter.highlighter.new = treesitter_new
