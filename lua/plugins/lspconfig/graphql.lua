@@ -59,7 +59,7 @@ local function cursor_in_graphql()
     local parser = get_parser(buf)
     if not parser then return false end
 
-    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
     row = row - 1
 
     local tree = parser:language_for_range({ row, col, row, col })
@@ -290,6 +290,7 @@ local function attach_lsp_bridge(client)
 
                     for _, d in ipairs(result.diagnostics or {}) do
                         diagnostics[#diagnostics + 1] = {
+                            bufnr = bufnr,
                             lnum = d.range.start.line,
                             col = d.range.start.character,
                             end_lnum = d.range["end"].line,
