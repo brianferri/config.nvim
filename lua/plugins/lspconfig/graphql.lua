@@ -59,7 +59,8 @@ local function cursor_in_graphql()
     local parser = get_parser(buf)
     if not parser then return false end
 
-    local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local row, col = cursor[1], cursor[2]
     row = row - 1
 
     local tree = parser:language_for_range({ row, col, row, col })
