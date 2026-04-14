@@ -253,22 +253,33 @@ end
 -- Treesitter Processing
 --------------------------------------------------------------------------------
 
+---@class GqlFragment
+---@field start_row integer
+---@field start_col integer
+---@field end_row integer
+---@field end_col integer
+---@field text string
+
 ---@param bufnr integer
+---@return GqlFragment[]
 local function collect_fragments(bufnr)
     local parser = get_parser(bufnr)
     if not parser then return {} end
     parser:parse(true)
-    ---@type { start_row: integer, text: string }[]
+    ---@type GqlFragment[]
     local fragments = {}
 
     parser:for_each_tree(function(tree, lang_tree)
         if lang_tree:lang() ~= "graphql" then return end
 
         local root = tree:root()
-        local row = select(1, root:range())
+        local start_row, start_col, end_row, end_col = root:range()
 
         table.insert(fragments, {
-            start_row = row,
+            start_row = start_row,
+            start_col = start_col,
+            end_row = end_row,
+            end_col = end_col,
             text = vim.treesitter.get_node_text(root, bufnr),
         })
     end)
@@ -276,17 +287,39 @@ local function collect_fragments(bufnr)
     return fragments
 end
 
+---@param row integer
+---@param col integer
+---@param fragments GqlFragment[]
+---@return integer, integer
+local function map_host_position_to_virtual(row, col, fragments)
+    for _, frag in ipairs(fragments) do
+        local before = row < frag.start_row or (row == frag.start_row and col < frag.start_col)
+        local after = row > frag.end_row or (row == frag.end_row and col > frag.end_col)
+
+        if not before and not after then
+            if row == frag.start_row then
+                return row, math.max(0, col - frag.start_col)
+            end
+            return row, col
+        end
+    end
+
+    return row, col
+end
+
 ---@param bufnr integer
+---@return GqlFragment[]
 local function process(bufnr)
-    if not vim.api.nvim_buf_is_valid(bufnr) then return end
+    if not vim.api.nvim_buf_is_valid(bufnr) then return {} end
     local fragments = collect_fragments(bufnr)
 
     if #fragments == 0 then
         if state.ns then vim.diagnostic.set(state.ns, bufnr, {}) end
-        return
+        return {}
     end
 
     sync_lsp(bufnr, fragments)
+    return fragments
 end
 
 --------------------------------------------------------------------------------
@@ -328,21 +361,27 @@ local function register_cmp()
     ---@param _ cmp.Context
     ---@param callback function
     function source:complete(_, callback)
-        local client = vim.lsp.get_clients({ name = "graphql" })[1]
+        local bufnr = vim.api.nvim_get_current_buf()
+        local fragments = process(bufnr)
+        if not fragments or #fragments == 0 then
+            return callback({ items = {}, isIncomplete = false })
+        end
+
+        local client = ensure_graphql_client(bufnr)
         if not client then
             return callback({ items = {}, isIncomplete = false })
         end
 
-        local bufnr = vim.api.nvim_get_current_buf()
         local uri = virtual_uri(bufnr)
 
         local cursor = vim.api.nvim_win_get_cursor(0)
+        local line, character = map_host_position_to_virtual(cursor[1] - 1, cursor[2], fragments)
 
         client:request("textDocument/completion", {
             textDocument = { uri = uri },
             position = {
-                line = cursor[1] - 1,
-                character = cursor[2],
+                line = line,
+                character = character,
             },
             context = { triggerKind = 1 },
         }, function(err, result)
