@@ -381,7 +381,14 @@ function M.setup(opts)
               (#set! injection.include-children))
             ]], node)
 
-            vim.treesitter.query.set(lang, "injections", existing .. "\n" .. rule)
+            local ok = pcall(vim.treesitter.query.set, lang, "injections", existing .. "\n" .. rule)
+            if not ok then
+                vim.notify(
+                    string.format("Failed to update GraphQL injections for '%s'", lang),
+                    vim.log.levels.WARN,
+                    { title = config.namespace }
+                )
+            end
         end
     end
 
