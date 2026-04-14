@@ -324,9 +324,8 @@ function M.setup(opts)
         if not existing:find("uGraphQL_injection", 1, true) then
             local rule = string.format([[
             ((%s) @injection.content
-              (#lua-match? @injection.content "#%%s*graphql")
+              (#lua-match? @injection.content "^%%s*#%%s*graphql")
               (#set! injection.language "graphql")
-              (#set! injection.combined)
               (#set! injection.include-children))
             ]], node)
 
