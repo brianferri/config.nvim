@@ -13,6 +13,8 @@ local M = {}
 ---@field timers table<integer, uv.uv_timer_t>
 ---@field virtual_docs table<integer, GqlVirtualDoc>
 ---@field ns ?integer
+---@field hover_patched? boolean
+---@field original_hover? fun(opts?: vim.lsp.buf.hover.Opts)
 
 ---@type GqlConfig
 local config = {
@@ -39,6 +41,8 @@ local state = {
     timers = {},
     virtual_docs = {},
     ns = nil,
+    hover_patched = false,
+    original_hover = nil,
 }
 
 local augroup = vim.api.nvim_create_augroup("UniversalGraphQL", { clear = true })
@@ -323,6 +327,72 @@ local function process(bufnr)
 end
 
 --------------------------------------------------------------------------------
+-- Hover Monkey Patching
+--------------------------------------------------------------------------------
+
+---@param result lsp.Hover|nil
+---@param opts vim.lsp.buf.hover.Opts|nil
+local function open_hover_preview(result, opts)
+    if not result or not result.contents then return end
+
+    local lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+    while #lines > 0 and lines[1]:match("^%s*$") do
+        table.remove(lines, 1)
+    end
+    while #lines > 0 and lines[#lines]:match("^%s*$") do
+        table.remove(lines, #lines)
+    end
+    if vim.tbl_isempty(lines) then return end
+
+    local hover_opts = vim.tbl_deep_extend("force", { focus_id = config.namespace .. "_hover" }, opts or {})
+    vim.lsp.util.open_floating_preview(lines, "markdown", hover_opts)
+end
+
+---@param opts vim.lsp.buf.hover.Opts|nil
+local function hover_in_virtual_graphql(opts)
+    local bufnr = vim.api.nvim_get_current_buf()
+    local ft = vim.bo[bufnr].filetype
+    if not config.string_node_map[ft] or not cursor_in_graphql() then return false end
+
+    local fragments = process(bufnr)
+    if #fragments == 0 then return false end
+
+    local client = ensure_graphql_client(bufnr)
+    if not client then return false end
+
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local line, character = map_host_position_to_virtual(cursor[1] - 1, cursor[2], fragments)
+    local uri = virtual_uri(bufnr)
+
+    client:request("textDocument/hover", {
+        textDocument = { uri = uri },
+        position = {
+            line = line,
+            character = character,
+        },
+    }, function(err, result)
+        if err then return end
+        open_hover_preview(result, opts)
+    end, bufnr)
+
+    return true
+end
+
+local function register_hover_bridge()
+    if state.hover_patched then return end
+    state.hover_patched = true
+    state.original_hover = vim.lsp.buf.hover
+
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.lsp.buf.hover = function(opts)
+        if hover_in_virtual_graphql(opts) then return end
+        if state.original_hover then
+            return state.original_hover(opts)
+        end
+    end
+end
+
+--------------------------------------------------------------------------------
 -- Debounce
 --------------------------------------------------------------------------------
 
@@ -469,6 +539,7 @@ function M.setup(opts)
         end,
     })
 
+    register_hover_bridge()
     register_cmp()
 end
 
