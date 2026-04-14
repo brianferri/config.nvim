@@ -132,7 +132,15 @@ local function highlight_comments(bufnr)
     local parser = vim.treesitter.get_parser(bufnr, lang, {})
     if not parser then return end
 
-    local root = parser:parse()[1]:root()
+    local trees = parser:parse()
+    local first_tree = trees and trees[1]
+
+    if not first_tree then
+        vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+        return
+    end
+
+    local root = first_tree:root()
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
     for _, node in comments:iter_captures(root, bufnr, 0, -1) do

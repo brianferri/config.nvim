@@ -27,6 +27,7 @@ local function patch_query(Query)
                 local name = self.captures[capture]
                 local priority = priorities[name]
                 if priority then
+                    metadata = metadata or {}
                     metadata.priority = priority
                 end
             end
