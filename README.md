@@ -18,7 +18,6 @@
    ```
 2. Boot Neovim; The plugin manager will pick up `init.lua` and load everything.
 3. Run `:checkhealth` to see if anything is missing (LSPs, debug adapters, etc.).
-4. Optionally, add or override modules (see [Customization](#customization-and-extending) below).
 
 ## Usage Tips
 
