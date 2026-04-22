@@ -35,7 +35,7 @@ require("nvim-tree").setup({
         indent_markers = {
             enable = true,
         },
-        highlight_git = true,
+        highlight_git = "name",
         highlight_modified = "icon",
         icons = {
             glyphs = {
