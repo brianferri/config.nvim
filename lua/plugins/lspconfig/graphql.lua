@@ -35,6 +35,7 @@ How virtual documents are named
 ---@field ns ?integer
 ---@field hover_patched? boolean
 ---@field original_hover? fun(opts?: vim.lsp.buf.hover.Opts)
+---@field bridged_clients table<vim.lsp.Client, boolean>
 
 ---@type GqlConfig
 local config = {
@@ -63,6 +64,8 @@ local state = {
     ns = nil,
     hover_patched = false,
     original_hover = nil,
+    -- ? Weak keys so a stopped client's entry goes away with the client itself
+    bridged_clients = setmetatable({}, { __mode = "k" }),
 }
 
 local augroup = vim.api.nvim_create_augroup("UniversalGraphQL", { clear = true })
@@ -190,6 +193,11 @@ end
 
 ---@param client vim.lsp.Client
 local function attach_lsp_bridge(client)
+    -- ! `vim.lsp.start` and `LspAttach` both reach here for the same client;
+    -- ! wrapping twice nests a handler chain that grows on every attach.
+    if state.bridged_clients[client] then return end
+    state.bridged_clients[client] = true
+
     local base =
         client.handlers["textDocument/publishDiagnostics"]
         or vim.lsp.handlers["textDocument/publishDiagnostics"]
@@ -200,7 +208,7 @@ local function attach_lsp_bridge(client)
     ---@param ctx lsp.HandlerContext
     ---@param cfg table
         function(err, result, ctx, cfg)
-            if not result or not result.uri then return end
+            if not result or not result.uri then return base(err, result, ctx, cfg) end
             if is_virtual_graphql_uri(result.uri) then
                 local bufnr = resolve_virtual_uri_bufnr(result.uri)
 
@@ -576,11 +584,17 @@ end
 --------------------------------------------------------------------------------
 
 ---@param bufnr integer
+local function release_timer(bufnr)
+    local timer = state.timers[bufnr]
+    if not timer then return end
+    timer:stop()
+    if not timer:is_closing() then timer:close() end
+    state.timers[bufnr] = nil
+end
+
+---@param bufnr integer
 local function debounce(bufnr)
-    if state.timers[bufnr] then
-        state.timers[bufnr]:stop()
-        state.timers[bufnr]:close()
-    end
+    release_timer(bufnr)
 
     local timer = vim.uv.new_timer()
     if not timer then return end
@@ -686,6 +700,7 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd("BufDelete", {
         group = augroup,
         callback = function(args)
+            release_timer(args.buf)
             clear_virtual_docs(args.buf, vim.lsp.get_clients({ name = "graphql" })[1])
         end,
     })
