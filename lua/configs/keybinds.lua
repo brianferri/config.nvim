@@ -6,7 +6,7 @@
 --- @param opts vim.keymap.set.Opts|nil
 local map = function(mode, lhs, rhs, desc, opts)
     local conf = { noremap = true, silent = true, desc = desc }
-    if opts then vim.tbl_deep_extend('force', conf, opts) end
+    if opts then conf = vim.tbl_deep_extend('force', conf, opts) end
     vim.keymap.set(mode, lhs, rhs, conf)
 end
 
@@ -89,9 +89,9 @@ for _, key in ipairs(surround_keys) do
     map('v', open, "<Plug>(nvim-surround-visual)" .. close, "Surround Selection With `" .. key .. "`")
 end
 
-local comment = function() return require('vim._comment').operator() .. '_' end
-map({ 'i', 'n' }, '<M-/>', '<ESC>' .. comment(), "Toggle Comment", { expr = true })
-map('v', '<M-/>', comment(), "Toggle Comment", { expr = true })
+local comment = function() return require('vim._comment').operator() end
+map({ 'i', 'n' }, '<M-/>', function() return '<ESC>' .. comment() .. '_' end, "Toggle Comment", { expr = true })
+map('v', '<M-/>', comment, "Toggle Comment", { expr = true })
 
 -- Copy/Cut/Paste/Undo/Redo
 map({ 'i', 'n' }, '<M-v>', '<ESC>"+pa', "Paste")
@@ -100,7 +100,7 @@ map('v', '<M-v>', '"+pa', "Paste")
 map(all, '<M-z>', '<ESC>ui', "Undo")
 map(all, '<M-S-z>', '<ESC><C-r>i', "Redo")
 
-map({ 'i', 'n' }, '<M-x>', '<ESC>dd<ESC>i', "Cut")
+map({ 'i', 'n' }, '<M-x>', '<ESC>"+dd<ESC>i', "Cut")
 map('v', '<M-x>', '"+d<ESC>i', "Cut")
 map('v', '<M-c>', '"+y<ESC>i', "Copy")
 
