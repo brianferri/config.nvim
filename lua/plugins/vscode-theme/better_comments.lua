@@ -20,12 +20,23 @@ local M = {}
 
 --- @alias BetterCommentsConfig table<string, vim.api.keyset.highlight>
 
---- Holds the comment format options for the focused buffer
---- @type CommentOption[]
-local buffer_format_comments = {}
+--- @class MarkerPattern
+--- @field pattern string
+--- @field hl_group string
+
+--- Each buffer's comment leaders crossed with the configured markers. Both
+--- halves are fixed for the life of a buffer, and building them per line was
+--- the bulk of the work done on every keystroke.
+--- @type table<integer, MarkerPattern[]>
+local buffer_patterns = {}
+
+--- @type table<integer, uv.uv_timer_t>
+local timers = {}
 
 --- @type BetterCommentsConfig
 local user_config = {}
+
+local redraw_debounce_ms = 40
 
 -----------------------------------------------------------
 -- Utility
@@ -121,8 +132,35 @@ end
 
 local ns = vim.api.nvim_create_namespace("BetterComments")
 
+--- Rows currently on screen across every window showing the buffer.
+--- Nil when the buffer is displayed nowhere, in which case there is nothing to
+--- highlight until a `BufWinEnter` brings it back.
+--- @param bufnr integer
+--- @return integer|nil top
+--- @return integer|nil bot
+local function visible_range(bufnr)
+    local top, bot = math.huge, -1
+    for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
+        local info = vim.fn.getwininfo(win)[1]
+        if info then
+            top = math.min(top, info.topline - 1)
+            bot = math.max(bot, info.botline)
+        end
+    end
+    if bot < 0 then return nil, nil end
+    return math.max(0, top), bot
+end
+
 --- @param bufnr integer
 local function highlight_comments(bufnr)
+    if not vim.api.nvim_buf_is_valid(bufnr) then return end
+
+    local patterns = buffer_patterns[bufnr]
+    if not patterns or vim.tbl_isempty(patterns) then return end
+
+    local top, bot = visible_range(bufnr)
+    if not top or not bot then return end
+
     local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
     if not lang then return end
 
@@ -132,33 +170,36 @@ local function highlight_comments(bufnr)
     local parser = vim.treesitter.get_parser(bufnr, lang, {})
     if not parser then return end
 
-    local trees = parser:parse()
+    local trees = parser:parse({ top, bot })
     local first_tree = trees and trees[1]
 
     if not first_tree then
-        vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+        vim.api.nvim_buf_clear_namespace(bufnr, ns, top, bot)
         return
     end
 
     local root = first_tree:root()
-    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, ns, top, bot)
 
-    for _, node in comments:iter_captures(root, bufnr, 0, -1) do
+    for _, node in comments:iter_captures(root, bufnr, top, bot) do
         local linenr, col = node:range()
         local text = vim.treesitter.get_node_text(node, bufnr)
         local i = 0
         -- ? We want to handle each line separately, allowing us to encode
         -- ? meaning, potentially, in different lines of a multiline comment
         for line in text:gmatch("[^\n]+") do
-            for pattern, _ in pairs(user_config) do
-                for _, comment_option in ipairs(buffer_format_comments) do
+            local row = linenr + i
+            -- ! A comment straddling the top of the viewport reports rows above
+            -- ! the cleared range; marking those would stack on every redraw
+            if row >= top and row < bot then
+                for _, marker in ipairs(patterns) do
                     -- * This is a single iteration since we're already iterating over single lines
-                    for padding, hl_comment_text in line:gmatch(comment_pattern(comment_option, pattern)) do
+                    for padding, hl_comment_text in line:gmatch(marker.pattern) do
                         local start_col = (i > 0) and #padding or col
                         local end_col = start_col + ((i > 0) and #hl_comment_text or #line)
-                        vim.api.nvim_buf_set_extmark(bufnr, ns, linenr + i, start_col, {
+                        vim.api.nvim_buf_set_extmark(bufnr, ns, row, start_col, {
                             end_col = end_col,
-                            hl_group = hl_group_name(pattern),
+                            hl_group = marker.hl_group,
                             -- ! We don't want to override all treesitter highlighting (default 100) just the `@comment`
                             priority = 99,
                         })
@@ -172,13 +213,48 @@ local function highlight_comments(bufnr)
     end
 end
 
+--- @param bufnr integer
+local function release_timer(bufnr)
+    local timer = timers[bufnr]
+    if not timer then return end
+    timer:stop()
+    if not timer:is_closing() then timer:close() end
+    timers[bufnr] = nil
+end
+
+--- @param bufnr integer
+local function schedule_highlight(bufnr)
+    release_timer(bufnr)
+
+    local timer = vim.uv.new_timer()
+    if not timer then return highlight_comments(bufnr) end
+
+    timers[bufnr] = timer
+    timer:start(redraw_debounce_ms, 0, vim.schedule_wrap(function()
+        release_timer(bufnr)
+        highlight_comments(bufnr)
+    end))
+end
+
 -----------------------------------------------------------
 -- Setup
 -----------------------------------------------------------
 
 --- @param bufnr integer
-local function update_buffer_format_comments(bufnr)
-    buffer_format_comments = parse_format_comments(vim.bo[bufnr].comments)
+local function update_buffer_patterns(bufnr)
+    local options = parse_format_comments(vim.bo[bufnr].comments)
+    --- @type MarkerPattern[]
+    local patterns = {}
+    for marker in pairs(user_config) do
+        local hl_group = hl_group_name(marker)
+        for _, comment_option in ipairs(options) do
+            table.insert(patterns, {
+                pattern = comment_pattern(comment_option, marker),
+                hl_group = hl_group,
+            })
+        end
+    end
+    buffer_patterns[bufnr] = patterns
     highlight_comments(bufnr)
 end
 
@@ -189,13 +265,31 @@ function M.setup(opts)
     set_hl_groups(user_config)
 
     local group = vim.api.nvim_create_augroup("BetterComments", { clear = true })
-    vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "FileType" }, {
         group = group,
-        callback = function(args) update_buffer_format_comments(args.buf) end,
+        callback = function(args) update_buffer_patterns(args.buf) end,
     })
+    -- ! `TextChanged` fires for whichever buffer changed, not the focused one,
+    -- ! so the leaders have to be looked up per buffer
     vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
         group = group,
-        callback = function(args) highlight_comments(args.buf) end,
+        callback = function(args) schedule_highlight(args.buf) end,
+    })
+    -- ? Only the viewport is marked, so scrolling has to bring the rest in
+    vim.api.nvim_create_autocmd({ "WinScrolled", "WinResized" }, {
+        group = group,
+        callback = function()
+            for _, winid in ipairs(vim.api.nvim_list_wins()) do
+                schedule_highlight(vim.api.nvim_win_get_buf(winid))
+            end
+        end,
+    })
+    vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
+        group = group,
+        callback = function(args)
+            release_timer(args.buf)
+            buffer_patterns[args.buf] = nil
+        end,
     })
 end
 
