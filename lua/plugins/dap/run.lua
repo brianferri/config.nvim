@@ -15,11 +15,20 @@ local M = {}
 
 --- @class DapRunConfig
 --- @field search_root string? Directory to search executables from.
+--- @field max_depth integer? How deep below `search_root` to descend.
+--- @field max_results integer? Upper bound on the executables offered.
+--- @field ignored_directories string[]? Path segments to skip while scanning.
 --- @field configurations table<string, dap.Configuration> Table of `Name: DAPDef` options
 
 --- @type DapRunConfig
 local user_opts = {
     search_root = ".",
+    max_depth = 5,
+    max_results = 200,
+    ignored_directories = {
+        ".git", "node_modules", "vendor", "target", "dist", "build",
+        ".venv", "venv", "zig-cache", ".zig-cache", "zig-out",
+    },
     configurations = {},
 }
 
@@ -27,6 +36,9 @@ local user_opts = {
 --- @param opts DapRunConfig
 function M.configure(opts)
     user_opts.search_root = opts.search_root or user_opts.search_root
+    user_opts.max_depth = opts.max_depth or user_opts.max_depth
+    user_opts.max_results = opts.max_results or user_opts.max_results
+    user_opts.ignored_directories = opts.ignored_directories or user_opts.ignored_directories
     user_opts.configurations = vim.tbl_extend(
         "force",
         user_opts.configurations,
@@ -34,21 +46,36 @@ function M.configure(opts)
     )
 end
 
---- Scan for executable files under search_root
+--- @param path string
+--- @return boolean
+local function is_ignored(path)
+    for _, dir in ipairs(user_opts.ignored_directories) do
+        if path:find("/" .. dir .. "/", 1, true) then return true end
+    end
+    return false
+end
+
+--- Scan for executable files under search_root.
+--- The scan walks a whole source tree on every invocation, so it stops at the
+--- first `max_results` and skips dependency and artifact directories, which
+--- hold the bulk of the executable bits in most projects.
 --- @return string[]
 local function find_executables()
-    local results = {}
-    scan.scan_dir(user_opts.search_root, {
+    local found = 0
+    return scan.scan_dir(user_opts.search_root, {
         hidden = false,
         add_dirs = false,
-        depth = 5,
-        on_insert = function(path)
-            if vim.fn.executable(path) == 1 then
-                table.insert(results, path)
-            end
+        depth = user_opts.max_depth,
+        respect_gitignore = true,
+        silent = true,
+        search_pattern = function(entry)
+            if found >= user_opts.max_results then return false end
+            if is_ignored(entry) then return false end
+            if vim.fn.executable(entry) ~= 1 then return false end
+            found = found + 1
+            return true
         end,
     })
-    return results
 end
 
 --- Pick a DAP adapter
