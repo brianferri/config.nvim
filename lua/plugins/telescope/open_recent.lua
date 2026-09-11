@@ -83,30 +83,32 @@ end
 --- Gets a list of valid, unique recent file/directory items.
 --- @return RecentItem[]
 local function get_recent_items()
-    local seen = {}
-    return vim.tbl_map(
-        function(path)
+    --- @type RecentItem[], table<string, boolean>
+    local items, seen = {}, {}
+    for _, path in ipairs(vim.v.oldfiles) do
+        if not seen[path] and is_valid_path(path) then
             seen[path] = true
-            return format_item(path)
-        end,
-        vim.tbl_filter(
-            function(path) return is_valid_path(path) and not seen[path] end,
-            vim.v.oldfiles
-        )
-    )
+            table.insert(items, format_item(path))
+        end
+    end
+    return items
 end
 
 --- Runs a shell command and places its output into a buffer.
+--- The previewer moves with the cursor, so this stays asynchronous; the buffer
+--- can be gone by the time the command answers.
 --- @param cmd string[]
 --- @param bufnr integer
 local function run_command_to_buffer(cmd, bufnr)
-    vim.system(cmd, { text = true, clear_env = true }, function(result)
+    vim.system(cmd, { text = true }, function(result)
         vim.schedule(function()
-            local lines = vim.split(result.stdout, "\n", { trimempty = true })
+            if not vim.api.nvim_buf_is_valid(bufnr) then return end
+            local output = result.code == 0 and result.stdout or result.stderr
+            local lines = vim.split(output or "", "\n", { trimempty = true })
             if #lines == 0 then lines = { "[Command returned empty output]" } end
             vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
         end)
-    end):wait()
+    end)
 end
 
 -----------------------------------------------------------
@@ -164,18 +166,15 @@ end
 -- Picker
 -----------------------------------------------------------
 
---- Opens the selected file or directory from the picker.
---- @param selection TelescopeEntry|nil
-local function open_path(selection)
-    if not selection then return end
-    if selection.is_dir then
-        -- before opening a new project we save everything, just in case
-        vim.cmd("wa")
-        vim.cmd("cd " .. vim.fn.fnameescape(selection.path))
-        vim.cmd("e .")
-    else
-        vim.cmd("e " .. vim.fn.fnameescape(selection.path))
-    end
+--- @param selection TelescopeEntry
+local function open_file(selection)
+    vim.cmd("e " .. vim.fn.fnameescape(selection.path))
+end
+
+--- @param selection TelescopeEntry
+local function change_directory(selection)
+    vim.cmd("cd " .. vim.fn.fnameescape(selection.path))
+    vim.cmd("e .")
 end
 
 --- @param prompt_bufnr number
@@ -184,18 +183,32 @@ local function open_recent_mappings(prompt_bufnr)
     actions.select_default:replace(function()
         --- @type Picker
         local picker = action_state.get_current_picker(prompt_bufnr)
+        --- @type TelescopeEntry[]
         local selections = picker:get_multi_selection()
 
         if vim.tbl_isempty(selections) then
-            --- @type TelescopeReplaceEntry
+            --- @type TelescopeEntry
             local entry = action_state.get_selected_entry()
             table.insert(selections, entry)
         end
 
         actions.close(prompt_bufnr)
+
+        --- @type TelescopeEntry[], TelescopeEntry[]
+        local dirs, files = {}, {}
         for _, entry in ipairs(selections) do
-            open_path(entry)
+            if entry then table.insert(entry.is_dir and dirs or files, entry) end
         end
+
+        for _, entry in ipairs(files) do open_file(entry) end
+
+        -- ! The working directory is global, so a multi-directory selection has
+        -- ! no meaning past the last one; refuse it instead of picking for them.
+        if #dirs > 1 then
+            vim.notify("Select a single directory to change into", vim.log.levels.WARN)
+            return
+        end
+        if dirs[1] then change_directory(dirs[1]) end
     end)
     return true
 end
@@ -226,9 +239,9 @@ end
 -----------------------------------------------------------
 
 --- Setup the `Open Recent` command
----@param opts OpenRecentConfig
+---@param opts OpenRecentConfig|nil
 function M.setup(opts)
-    user_config = vim.tbl_deep_extend('force', user_config, opts)
+    user_config = vim.tbl_deep_extend('force', user_config, opts or {})
     vim.api.nvim_create_user_command("OpenRecent", open_recent, {
         desc = "Open Recent File or Directory",
     })
