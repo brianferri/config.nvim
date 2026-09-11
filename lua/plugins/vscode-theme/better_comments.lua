@@ -293,4 +293,9 @@ function M.setup(opts)
     })
 end
 
+-- ? Reachable for `tests/`: `:h format-comments` is dense enough that the
+-- ? decoding is worth pinning
+M._parse_format_comments = parse_format_comments
+M._comment_pattern = comment_pattern
+
 return M

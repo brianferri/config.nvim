@@ -663,4 +663,11 @@ function M.setup(opts)
     vim.api.nvim_create_user_command("SearchReplace", search_replace, { desc = "Search (and Replace)" })
 end
 
+-- ? Reachable for `tests/`: every write this picker performs is decided by
+-- ? these three, and a wrong answer here edits files
+M._parse_prompt_regex = parse_prompt_regex
+M._parse_range = parse_range
+M._build_hunks = build_hunks
+M._apply_replacement_to_file = apply_replacement_to_file
+
 return M

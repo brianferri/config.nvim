@@ -25,3 +25,9 @@
 * Use `:Lazy` to inspect loaded plugins.
 * Use `:Mason` (`:MasonLog`) to inspect LSPs, DAPs, Linters, etc.
 
+## Tests
+
+```bash
+nvim --headless -c 'luafile tests/run.lua'
+```
+
