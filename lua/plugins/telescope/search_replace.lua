@@ -85,6 +85,20 @@ local function write_file_lines(path, lines)
     return result == 0
 end
 
+--- Find the loaded buffer backing a path, if any.
+--- @param path string
+--- @return integer|nil
+local function loaded_bufnr(path)
+    local target = vim.fs.normalize(vim.fn.fnamemodify(path, ":p"))
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(bufnr) then
+            local name = vim.api.nvim_buf_get_name(bufnr)
+            if name ~= "" and vim.fs.normalize(name) == target then return bufnr end
+        end
+    end
+    return nil
+end
+
 --- Sets up a buffer with TS highlighting
 --- @param bufnr integer
 --- @param filetype string
@@ -192,42 +206,62 @@ local function transform_line(spec)
     end
 end
 
---- Parse a range specifier like "%", "3", or "2,5" into start/end line numbers.
+--- Resolve a single range address to a line number.
+--- @param address string
+--- @param max_lines integer
+--- @return integer|nil
+local function resolve_address(address, max_lines)
+    if address == "$" then return max_lines end
+    if address:match("^%d+$") then return tonumber(address) end
+    return nil
+end
+
+--- Parse a range specifier like "%", "3", "2,5" or "2,$" into start/end lines.
+--- Returns nil for any address this cannot resolve, so an unrecognised range
+--- refuses to run instead of widening to the whole file.
+---
+--- An absent range means the current line to `:s`, but a picker acting across
+--- files has no cursor to anchor that to, so it is read as the whole file.
 --- @see LuaDocs [Patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1)
 --- @see LuaDocs [`string.match`](https://www.lua.org/manual/5.4/manual.html#pdf-string.match)
 --- @param range string
 --- @param max_lines integer
---- @return integer
---- @return integer
+--- @return integer|nil
+--- @return integer|nil
 local function parse_range(range, max_lines)
+    if range == "" or range == "%" then return 1, max_lines end
+
     -- ! Matching an optional capture group is not possible in lua
     -- ! `(x)?` will always fail so we need to parse the two cases separately
 
     --- @type string|nil, string|nil
-    local min, max = range:match("^(%d+),(%d+)$")
-    local min_range = tonumber(min)
-    local max_range = tonumber(max)
-    if min_range and max_range then return min_range, max_range end
+    local min, max = range:match("^(.-),(.-)$")
+    if min and max then
+        local min_range = resolve_address(min, max_lines)
+        local max_range = resolve_address(max, max_lines)
+        if min_range and max_range then return min_range, max_range end
+        return nil, nil
+    end
 
-    --- @type string|nil
-    local single = range:match("^(%d+)$")
-    local single_range = tonumber(single)
+    local single_range = resolve_address(range, max_lines)
     if single_range then return single_range, single_range end
 
-    return 1, max_lines
+    return nil, nil
 end
 
 --- Apply substitution to lines
 --- Returns new lines and a list of changed line indexes.
+--- Returns nil when the spec carries a range that cannot be resolved.
 --- @param lines string[]
 --- @param spec ReplaceSpec
---- @return string[] new_lines
+--- @return string[]|nil new_lines
 --- @return integer[] changed_lines
 local function apply_spec_to_lines(lines, spec)
+    local start_line, end_line = parse_range(spec.range, #lines)
+    if not start_line or not end_line then return nil, {} end
+
     local transform = transform_line(spec)
     local new_lines, changed_lines = {}, {}
-
-    local start_line, end_line = parse_range(spec.range, #lines)
 
     for i, line in ipairs(lines) do
         if i >= start_line and i <= end_line then
@@ -282,10 +316,11 @@ end
 --- If `spec.is_replace` is false, only marks matches of `spec.search`.
 --- @param lines string[]
 --- @param spec ReplaceSpec
---- @return string[]
+--- @return string[]|nil
 --- @return Hunk[]
 local function collect_hunks(lines, spec)
     local new_lines, changed = apply_spec_to_lines(lines, spec)
+    if not new_lines then return nil, {} end
     return new_lines, build_hunks(#lines, changed)
 end
 
@@ -462,6 +497,10 @@ local function grep_buffer_preview(self, entry)
     local spec = entry.prompt
 
     local new_lines, hunks = collect_hunks(lines, spec)
+    if not new_lines then
+        setup_buffer(self.state.bufnr, "text", { ("Unsupported range: %s"):format(spec.range) })
+        return
+    end
     if #hunks > 0 then
         render_diff_preview(self.state.bufnr, lines, new_lines, hunks, spec, ft)
     end
@@ -480,6 +519,10 @@ local grep_buffer_previewer = previewers.new_buffer_previewer({
 })
 
 --- Apply the replacement spec to the given entry's file.
+--- Edits route through a loaded buffer when one exists, so the change lands in
+--- that buffer's undo history and its on-screen contents stay truthful. A
+--- buffer holding unsaved edits is refused: writing the file underneath it
+--- would strand them.
 --- @param entry TelescopeReplaceEntry
 --- @return boolean ok True on success.
 --- @return string|nil err Error message if not ok.
@@ -490,12 +533,42 @@ local function apply_replacement_to_file(entry)
         return false, "invalid or non-replace entry"
     end
 
-    local lines = read_file_lines(path)
-    if not lines then return false, "failed to read" end
-    local new_lines, changed = apply_spec_to_lines(lines, spec)
+    local bufnr = loaded_bufnr(path)
+    if bufnr and vim.bo[bufnr].modified then
+        return false, "buffer has unsaved changes"
+    end
 
+    local lines = bufnr
+        and vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        or read_file_lines(path)
+    if not lines then return false, "failed to read" end
+
+    local new_lines, changed = apply_spec_to_lines(lines, spec)
+    if not new_lines then return false, ("unsupported range: %s"):format(spec.range) end
     if vim.tbl_isempty(changed) then return false, "no changes" end
-    return write_file_lines(path, new_lines), nil
+
+    if bufnr then
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
+        local ok, err = pcall(vim.api.nvim_buf_call, bufnr, function()
+            vim.cmd.write({ mods = { silent = true } })
+        end)
+        if not ok then return false, tostring(err) end
+        return true, nil
+    end
+
+    if not write_file_lines(path, new_lines) then return false, "failed to write" end
+    return true, nil
+end
+
+--- @param count integer
+--- @return boolean
+local function confirm_replacements(count)
+    return vim.fn.confirm(
+        ("Apply replacements to %d file(s)?"):format(count),
+        "&Apply\n&Cancel",
+        2,
+        "Question"
+    ) == 1
 end
 
 -----------------------------------------------------------
@@ -533,18 +606,35 @@ local function search_replace_mappings(prompt_bufnr)
         end
 
         actions.close(prompt_bufnr)
+
+        --- @type TelescopeReplaceEntry[], TelescopeReplaceEntry[]
+        local replacements, opens = {}, {}
         for _, entry in ipairs(selections) do
-            if entry.prompt.is_replace then
-                local ok, err = apply_replacement_to_file(entry)
-                if ok then
-                    vim.notify("Replacements applied to " .. (entry.path or entry.value))
-                else
-                    vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
-                end
-            else
-                vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
+            if entry then
+                table.insert(entry.prompt and entry.prompt.is_replace and replacements or opens, entry)
             end
         end
+
+        for _, entry in ipairs(opens) do
+            vim.cmd("edit " .. vim.fn.fnameescape(from_entry.path(entry, true, false) or entry.value))
+        end
+
+        if vim.tbl_isempty(replacements) then return end
+        if not confirm_replacements(#replacements) then
+            vim.notify("Replacements cancelled", vim.log.levels.INFO)
+            return
+        end
+
+        for _, entry in ipairs(replacements) do
+            local ok, err = apply_replacement_to_file(entry)
+            if ok then
+                vim.notify("Replacements applied to " .. (entry.path or entry.value))
+            else
+                vim.notify("Replacement failed: " .. tostring(err), vim.log.levels.ERROR)
+            end
+        end
+
+        vim.cmd.checktime()
     end)
     return true
 end
