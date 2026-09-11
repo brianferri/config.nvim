@@ -1,4 +1,11 @@
-require("nvim-treesitter").install({ "all" })
+require("nvim-treesitter").install({
+    "bash", "c", "cmake", "cpp", "css", "diff", "dockerfile",
+    "git_config", "git_rebase", "gitcommit", "gitignore", "go", "gomod",
+    "graphql", "html", "javascript", "jsdoc", "json", "lua", "luadoc",
+    "make", "markdown", "markdown_inline", "php", "python", "query", "regex",
+    "ruby", "rust", "scss", "sql", "toml", "tsx", "typescript", "vim",
+    "vimdoc", "vue", "xml", "yaml", "zig",
+})
 
 vim.api.nvim_create_autocmd('FileType', {
     callback = function() pcall(vim.treesitter.start) end,
