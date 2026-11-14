@@ -17,7 +17,13 @@ local vtsls_config = {
             },
         },
     },
-    filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+    filetypes = {
+        'typescript',
+        'javascript',
+        'javascriptreact',
+        'typescriptreact',
+        'vue',
+    },
 }
 local vue_ls_config = {}
 
