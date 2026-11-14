@@ -10,7 +10,6 @@ require("mason-lspconfig").setup({
         "lua_ls",
         "rust_analyzer",
         "clangd",
-        "zls",
         "vtsls",
         "vue_ls",
         "cssls",
@@ -26,6 +25,7 @@ require("mason-lspconfig").setup({
 -- Some lsps may require certain configurations or overrides
 require("configs.lsps.vue")
 require("configs.lsps.graphql")
+require("configs.lsps.zig")
 
 -- Neovim 0.12 removed :LspInfo from nvim-lspconfig.
 -- Provide a lightweight compatibility command for this config.
